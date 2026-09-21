@@ -1,0 +1,24 @@
+{
+  "name": "uzdf-pro",
+  "private": true,
+  "version": "0.1.0",
+  "description": "BPLA uchuvchilari uchun platforma (UZDF'dan mukammalroq versiya)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:start": "bash scripts/db-start.sh",
+    "db:stop": "bash scripts/db-stop.sh",
+    "db:push": "npm --workspace @uzdfpro/api run db:push",
+    "db:seed": "npm --workspace @uzdfpro/api run db:seed",
+    "dev:api": "npm --workspace @uzdfpro/api run dev",
+    "dev:web": "npm --workspace @uzdfpro/web run dev",
+    "build": "npm --workspace @uzdfpro/api run build && npm --workspace @uzdfpro/web run build",
+    "test": "npm --workspace @uzdfpro/api run test",
+    "typecheck": "npm --workspace @uzdfpro/api run typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

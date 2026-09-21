@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+coverage/
+*.tsbuildinfo
+
+.env
+.env.local
+.env.*.local
+
+.pgdata/
+logs/
+*.log
+
+.DS_Store
+.idea/
+.vscode/
