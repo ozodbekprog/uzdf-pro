@@ -99,6 +99,10 @@ scripts/
 - `/dashboard` — pilot kabineti (EXP, daraja, progress)
 - `/admin` — moderator/admin paneli: zonalar statistikasi, xaritada chizish, CRUD
 
+## Deploy
+
+Vercel (web + API) va Neon Postgres uchun qadamlar: [`DEPLOY.md`](./DEPLOY.md).
+
 ## Xavfsizlik tamoyillari
 
 - Maxfiy kalitlar faqat `.env`da (repo'ga tushmaydi); productionda `JWT_SECRET` majburiy.
