@@ -14,6 +14,7 @@
     "db:seed": "npm --workspace @uzdfpro/api run db:seed",
     "dev:api": "npm --workspace @uzdfpro/api run dev",
     "dev:web": "npm --workspace @uzdfpro/web run dev",
+    "dev:mobile": "npm --workspace @uzdfpro/mobile run start",
     "build": "npm --workspace @uzdfpro/api run build && npm --workspace @uzdfpro/web run build",
     "test": "npm --workspace @uzdfpro/api run test",
     "typecheck": "npm --workspace @uzdfpro/api run typecheck"

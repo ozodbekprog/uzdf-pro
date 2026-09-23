@@ -15,3 +15,10 @@ logs/
 .DS_Store
 .idea/
 .vscode/
+
+# mobile / android local
+*.keystore
+*.jks
+apps/mobile/android/local.properties
+apps/mobile/.expo/
+.expo/

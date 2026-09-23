@@ -3,6 +3,7 @@ import Badge from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
 import StatCard from "@/components/ui/StatCard";
+import { Tilt } from "@/components/ui/Tilt";
 
 const stats: Array<{
   label: string;
@@ -192,14 +193,15 @@ export default function Home() {
       <section className="fade-up relative z-10 mx-auto -mt-8 w-full max-w-7xl px-4 sm:px-6">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <StatCard
-              key={stat.label}
-              label={stat.label}
-              value={stat.value}
-              hint={stat.hint}
-              accent={stat.accent}
-              className="bg-neutral-950/80 backdrop-blur-xl"
-            />
+            <Tilt key={stat.label}>
+              <StatCard
+                label={stat.label}
+                value={stat.value}
+                hint={stat.hint}
+                accent={stat.accent}
+                className="h-full bg-neutral-950/80 backdrop-blur-xl"
+              />
+            </Tilt>
           ))}
         </div>
       </section>
@@ -217,19 +219,21 @@ export default function Home() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           {features.map((feature) => (
-            <Card key={feature.title} hover className="flex flex-col gap-4 p-6">
-              <span className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-gradient-to-br from-sky-500/20 to-violet-500/10 text-sky-300">
-                {feature.icon}
-              </span>
-              <div className="flex flex-col gap-1.5">
-                <h3 className="text-base font-semibold text-white">
-                  {feature.title}
-                </h3>
-                <p className="text-sm leading-relaxed text-neutral-400">
-                  {feature.description}
-                </p>
-              </div>
-            </Card>
+            <Tilt key={feature.title}>
+              <Card hover className="flex h-full flex-col gap-4 p-6">
+                <span className="grid h-10 w-10 place-items-center rounded-xl border border-sky-400/20 bg-sky-400/10 text-sky-400 shadow-[0_0_20px_-5px_rgba(56,189,248,0.5)] ring-1 ring-sky-400/20">
+                  {feature.icon}
+                </span>
+                <div className="flex flex-col gap-1.5">
+                  <h3 className="text-base font-semibold text-white">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed text-neutral-400">
+                    {feature.description}
+                  </p>
+                </div>
+              </Card>
+            </Tilt>
           ))}
         </div>
       </section>
