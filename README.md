@@ -12,7 +12,7 @@ xavfsizlik va arxitektura jihatidan kuchaytirilgan versiya.
 | Baza | PostgreSQL (lokal klaster `.pgdata`, port 55432) |
 | Auth | JWT (access 15m) + refresh token rotatsiyasi, bcrypt |
 | Web | Next.js 16 (App Router), React 19, Tailwind CSS 4, Leaflet |
-| Test | Vitest (25 test, real DB bilan) |
+| Test | Vitest (33 test, real DB bilan) |
 
 ## Tez boshlash
 

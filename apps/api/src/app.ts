@@ -6,7 +6,7 @@ import rateLimit from "@fastify/rate-limit";
 import swagger from "@fastify/swagger";
 import swaggerUi from "@fastify/swagger-ui";
 import { env } from "./env.js";
-import { registerErrorHandler } from "./lib/errors.js";
+import { AppError, registerErrorHandler } from "./lib/errors.js";
 import { prisma } from "./lib/prisma.js";
 import { registerAuth, registerPrisma } from "./plugins/plugins.js";
 import { authRoutes } from "./routes/auth.js";
@@ -14,6 +14,9 @@ import { certificateRoutes } from "./routes/certificates.js";
 import { courseRoutes } from "./routes/courses.js";
 import { dashboardRoutes, ratingRoutes } from "./routes/dashboard.js";
 import { healthRoutes } from "./routes/health.js";
+import { newsRoutes } from "./routes/news.js";
+import { quizRoutes } from "./routes/quizzes.js";
+import { shopRoutes } from "./routes/shop.js";
 import { zoneRoutes } from "./routes/zones.js";
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -28,6 +31,25 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   registerErrorHandler(app);
+
+  // Bo'sh body bilan kelgan JSON so'rovlarni qabul qilamiz (masalan, body'siz POST).
+  // Buzilgan JSON esa 500 emas, 400 qaytaradi.
+  app.addContentTypeParser(
+    "application/json",
+    { parseAs: "string" },
+    (_request, body, done) => {
+      const text = typeof body === "string" ? body.trim() : "";
+      if (text === "") {
+        done(null, undefined);
+        return;
+      }
+      try {
+        done(null, JSON.parse(text));
+      } catch {
+        done(new AppError(400, "BAD_REQUEST", "JSON formati noto'g'ri"), undefined);
+      }
+    }
+  );
 
   await app.register(helmet, {
     contentSecurityPolicy: false,
@@ -58,7 +80,10 @@ export async function buildApp(): Promise<FastifyInstance> {
         { name: "health", description: "Servis holati" },
         { name: "auth", description: "Autentifikatsiya va JWT" },
         { name: "zones", description: "Geozonalar (RED/YELLOW/GREEN)" },
-        { name: "courses", description: "Akademiya va progress" }
+        { name: "courses", description: "Akademiya va progress" },
+        { name: "quizzes", description: "Dars testlari va baholash" },
+        { name: "news", description: "Soha yangiliklari" },
+        { name: "shop", description: "Dron do'koni va buyurtmalar" }
       ],
       components: {
         securitySchemes: {
@@ -80,6 +105,9 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(dashboardRoutes, { prefix: "/api/v1/dashboard" });
   await app.register(ratingRoutes, { prefix: "/api/v1/rating" });
   await app.register(certificateRoutes, { prefix: "/api/v1/certificates" });
+  await app.register(quizRoutes, { prefix: "/api/v1/quizzes" });
+  await app.register(newsRoutes, { prefix: "/api/v1/news" });
+  await app.register(shopRoutes, { prefix: "/api/v1/shop" });
 
   return app;
 }

@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  * Адрес API по умолчанию — LAN-IP этой машины, меняется на экране "Bosh sahifa".
  */
 
-export const DEFAULT_API_URL = "http://190.191.13.156:4000";
+export const DEFAULT_API_URL = "http://190.191.8.185:4000";
 
 const API_URL_KEY = "uzdfpro.apiUrl";
 const TOKENS_KEY = "uzdfpro.tokens";
@@ -126,9 +126,12 @@ export async function isLoggedIn(): Promise<boolean> {
 export async function api<T>(path: string, options: RequestInit = {}, auth = false): Promise<T> {
   const base = await getApiUrl();
   const headers: Record<string, string> = {
-    "content-type": "application/json",
     ...((options.headers as Record<string, string>) ?? {}),
   };
+  // Body bo'lmasa content-type yuborilmaydi (bo'sh JSON body xatosi oldini oladi).
+  if (options.body !== undefined && options.body !== null) {
+    headers["content-type"] = headers["content-type"] ?? "application/json";
+  }
   if (auth) {
     const tokens = await getTokens();
     if (tokens) headers.authorization = `Bearer ${tokens.accessToken}`;

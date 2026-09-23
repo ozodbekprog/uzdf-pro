@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import NavBar from "@/components/NavBar";
+import Chrome from "@/components/Chrome";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "UZDF Pro — BPLA uchuvchilari platformasi",
+  title: "DRONCHI — Dron texnologiyalariga olib boruvchi yagona platforma",
   description:
-    "Geozonalar, akademiya va pilot profili: O'zbekiston BPLA uchuvchilari uchun yagona platforma.",
+    "O'zbekistondagi yagona aviatsiya ekotizimi: online o'quv dasturi, milliy simulyator, poligonlar xaritasi, maxsus dronlar va soha yangiliklari.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -27,8 +27,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
-        <NavBar />
-        <div className="flex flex-1 flex-col">{children}</div>
+        <Chrome>
+          <div className="flex flex-1 flex-col">{children}</div>
+        </Chrome>
         <Toaster position="bottom-center" richColors theme="dark" />
       </body>
     </html>

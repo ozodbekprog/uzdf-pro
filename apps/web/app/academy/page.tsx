@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Alert from "@/components/ui/Alert";
@@ -77,33 +78,46 @@ export default function AcademyPage() {
             />
           </div>
         ) : (
-          <section className="fade-up grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {courses.map((course) => (
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course, index) => (
               <Card
                 key={course.id}
                 hover
-                className="flex flex-col gap-3 p-6"
+                className={`rise rise-${(index % 3) + 1} flex flex-col overflow-hidden`}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <h2 className="text-lg font-semibold text-white">{course.title}</h2>
-                  <Badge tone="sky">{course.lessonsCount} ta dars</Badge>
+                <div className="relative h-36 w-full">
+                  <Image
+                    src={course.coverUrl ?? "/images/course-fpv.png"}
+                    alt={course.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover"
+                    priority={index === 0}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#050a17] via-[#050a17]/30 to-transparent" />
+                  <span className="absolute right-3 top-3">
+                    <Badge tone="sky">{course.lessonsCount} ta dars</Badge>
+                  </span>
                 </div>
-                {course.description ? (
-                  <p className="flex-1 text-sm text-neutral-400">{course.description}</p>
-                ) : (
-                  <div className="flex-1" />
-                )}
-                <Link
-                  href={`/academy/${course.slug}`}
-                  className={buttonClasses({
-                    variant: "secondary",
-                    size: "sm",
-                    className: "self-start",
-                  })}
-                >
-                  Kursni ochish
-                  <span aria-hidden="true">→</span>
-                </Link>
+                <div className="flex flex-1 flex-col gap-3 p-5">
+                  <h2 className="text-lg font-semibold text-white">{course.title}</h2>
+                  {course.description ? (
+                    <p className="flex-1 text-sm text-neutral-400">{course.description}</p>
+                  ) : (
+                    <div className="flex-1" />
+                  )}
+                  <Link
+                    href={`/academy/${course.slug}`}
+                    className={buttonClasses({
+                      variant: "secondary",
+                      size: "sm",
+                      className: "self-start",
+                    })}
+                  >
+                    Kursni ochish
+                    <span aria-hidden="true">→</span>
+                  </Link>
+                </div>
               </Card>
             ))}
           </section>

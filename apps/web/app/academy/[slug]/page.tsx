@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import LessonPlayer from "@/components/LessonPlayer";
+import QuizCard from "@/components/QuizCard";
 import Alert from "@/components/ui/Alert";
 import Badge from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
@@ -154,6 +155,7 @@ function CourseView({ slug }: { slug: string }) {
                       {selectedLesson.content}
                     </p>
                   </Card>
+                  <QuizCard key={selectedLesson.id} lessonId={selectedLesson.id} />
                 </>
               ) : (
                 <EmptyState

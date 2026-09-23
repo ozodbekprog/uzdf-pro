@@ -73,6 +73,244 @@ const havoHuquqiLessons = [
   }
 ];
 
+const newsItems = [
+  {
+    slug: "dronchi-ekotizimi-ishga-tushdi",
+    title: "DRONCHI ekotizimi ishga tushdi",
+    summary:
+      "Online o'quv dasturi, milliy simulyator, poligonlar xaritasi va maxsus dronlar — bitta platformada.",
+    category: "Platforma",
+    cover: "/images/news-ecosystem.png",
+    body:
+      "DRONCHI — O'zbekistondagi yagona, aviatsiya sohasi uchun mo'ljallangan ekotizim.\n\nPlatforma besh ustunga tayanadi: online o'quv dasturi, milliy simulyator, poligonlar xaritasi, maxsus dronlar va soha yangiliklari. Endi uchuvchilar nazariy bilim, amaliy mashg'ulot va xarid jarayonini bir joyda olib borishi mumkin."
+  },
+  {
+    slug: "toshkentda-ikki-dron-poligoni",
+    title: "Toshkentda ikkita dron poligoni ishga tushdi",
+    summary:
+      "IIV bilan hamkorlikda respublikaning har bir viloyatida maxsus poligonlar qurilmoqda.",
+    category: "Poligonlar",
+    cover: "/images/news-polygons.png",
+    body:
+      "Ichki ishlar vazirligi bilan hamkorlikda yurtimizning har bir viloyatida dronlar uchun mo'ljallangan maxsus poligonlar qurilmoqda. Jamoa poligonlarning dizayni, joylashuvi va texnik mas'uliyatini oladi.\n\nAyni vaqtda Toshkent shahrida ikkita, Nukus shahrida va Buxoro viloyatida bittadan poligon mavjud. Poligonlar xaritasi platformada interaktiv ko'rinishda."
+  },
+  {
+    slug: "milliy-simulyator-40-soat",
+    title: "Milliy simulyator: 40 soatdan ortiq amaliy mashg'ulot",
+    summary:
+      "Xalqaro standartlarga moslashtirilgan simulyator real dronni boshqarishdan avval talab etiladi.",
+    category: "Simulyator",
+    cover: "/images/news-simulator.png",
+    body:
+      "Xalqaro standartlarga muvofiq, real dronni boshqarishdan avval simulyatorlarda 40 soatdan ortiq amaliy mashg'ulot o'tkazish talab etiladi.\n\nDronlar sohasidagi 3 yillik tajriba asosida O'zbekiston va xalqaro standartlar talablariga moslashtirilgan milliy simulyator ishlab chiqildi. Simulyator uchun oylik obuna modeli joriy etilgan."
+  },
+  {
+    slug: "drone-racing-loyihalash-soccer-kurslari",
+    title: "Drone racing, loyihalash va soccer kurslari ochildi",
+    summary:
+      "3 yillik tajriba asosidagi professional darajadagi online kurslar uch bosqichdan iborat.",
+    category: "Akademiya",
+    cover: "/images/news-courses.png",
+    body:
+      "Kurs davomida nafaqat dronni yig'ish, balki uni uchirish va dronlardan to'g'ri foydalanish madaniyati o'rgatiladi.\n\nBoshlang'ich jarayon uch bosqichdan iborat: Drone racing, Drone loyihalash va Drone soccer. Har bir dars yakunida test topshiriladi va muvaffaqiyatli yakunlangan kurs uchun raqamli sertifikat beriladi."
+  }
+];
+
+const products = [
+  {
+    slug: "dronchi-starter-250",
+    name: "DRONCHI Starter 250",
+    description:
+      "O'quv uchun mo'ljallangan, 250 grammdan oshmagan dron. Boshlang'ich kurslar uchun ideal.",
+    category: "O'quv dronlari",
+    price: 3_500_000,
+    stock: 12,
+    imageUrl: "/images/product-starter.png"
+  },
+  {
+    slug: "dronchi-racer-fpv",
+    name: "DRONCHI Racer FPV",
+    description: "Drone racing yo'nalishi uchun tezkor FPV dron to'plami.",
+    category: "FPV",
+    price: 7_200_000,
+    stock: 6,
+    imageUrl: "/images/product-racer.png"
+  },
+  {
+    slug: "dronchi-soccer-cage",
+    name: "DRONCHI Soccer Cage",
+    description: "Drone soccer uchun himoya karkasi bilan jihozlangan model.",
+    category: "Drone soccer",
+    price: 4_800_000,
+    stock: 4,
+    imageUrl: "/images/product-soccer.png"
+  },
+  {
+    slug: "dronchi-simulator-kit",
+    name: "Milliy simulyator to'plami",
+    description:
+      "Uyda mashq qilish uchun transmitter va simulyator litsenziyasi (1 oylik obuna).",
+    category: "Aksessuarlar",
+    price: 1_200_000,
+    stock: 20,
+    imageUrl: "/images/product-sim-kit.png"
+  }
+];
+
+const quizzes: Array<{
+  courseSlug: string;
+  position: number;
+  title: string;
+  passScore: number;
+  questions: Array<{ text: string; options: string[]; correct: number }>;
+}> = [
+  {
+    courseSlug: "fpv-asoslari",
+    position: 1,
+    title: "FPV dron asoslari testi",
+    passScore: 70,
+    questions: [
+      {
+        text: "FPV qisqartmasi nimani anglatadi?",
+        options: [
+          "First Person View",
+          "Fast Propeller Vehicle",
+          "Flight Path Visual",
+          "Full Power Voltage"
+        ],
+        correct: 0
+      },
+      {
+        text: "Kvadrokopterda nechta motor bo'ladi?",
+        options: ["2", "3", "4", "6"],
+        correct: 2
+      },
+      {
+        text: "LiPo batareyaning asosiy afzalligi nima?",
+        options: [
+          "Energiya zichligi yuqori va yengil",
+          "Faqat suvda ishlaydi",
+          "Quvvat bermaydi",
+          "Faqat 1S bo'ladi"
+        ],
+        correct: 0
+      }
+    ]
+  },
+  {
+    courseSlug: "fpv-asoslari",
+    position: 2,
+    title: "Havo hududi qoidalari testi",
+    passScore: 70,
+    questions: [
+      {
+        text: "RED zona nimani bildiradi?",
+        options: [
+          "Uchish qat'iyan taqiqlangan",
+          "Erkin uchish mumkin",
+          "Faqat tunda uchish mumkin",
+          "Cheklangan ruxsat"
+        ],
+        correct: 0
+      },
+      {
+        text: "GREEN zona qanday zona?",
+        options: [
+          "Erkin uchish mumkin",
+          "Taqiqlangan hudud",
+          "Faqat 50 m balandlikda uchish",
+          "Faqat harbiy uchun"
+        ],
+        correct: 0
+      },
+      {
+        text: "Har bir reys oldidan nima qilish majburiy?",
+        options: [
+          "Geozonalarni tekshirish",
+          "Batareyani zaryadsizlantirish",
+          "Pervanelarni olib tashlash",
+          "GPSni o'chirish"
+        ],
+        correct: 0
+      }
+    ]
+  },
+  {
+    courseSlug: "fpv-asoslari",
+    position: 3,
+    title: "Birinchi parvoz testi",
+    passScore: 70,
+    questions: [
+      {
+        text: "Birinchi parvozdan oldin qaysi tekshiruv majburiy?",
+        options: [
+          "Failsafe tekshiruvi",
+          "Kamerani o'chirish",
+          "GPSni o'chirish",
+          "Motorlarni olib tashlash"
+        ],
+        correct: 0
+      },
+      {
+        text: "GPS lock nima uchun kerak?",
+        options: [
+          "Barqaror joylashuv va qaytish uchun",
+          "Video uzatish uchun",
+          "Batareya quvvati uchun",
+          "Motor sovutish uchun"
+        ],
+        correct: 0
+      }
+    ]
+  },
+  {
+    courseSlug: "havo-huquqi",
+    position: 1,
+    title: "BPLA qonunchiligi testi",
+    passScore: 70,
+    questions: [
+      {
+        text: "BPLA uchirishni tartibga soluvchi asosiy hujjat qaysi?",
+        options: ["Havo kodeksi", "Mehnat kodeksi", "Soliq kodeksi", "Fuqarolik kodeksi"],
+        correct: 0
+      },
+      {
+        text: "Uchuvchi javobgarligi qachon yuzaga keladi?",
+        options: [
+          "Qoidalar buzilganda",
+          "Har doim",
+          "Hech qachon",
+          "Faqat tunda uchirganda"
+        ],
+        correct: 0
+      }
+    ]
+  },
+  {
+    courseSlug: "havo-huquqi",
+    position: 2,
+    title: "Xavfsizlik qoidalari testi",
+    passScore: 70,
+    questions: [
+      {
+        text: "Odamlar ustidan uchish qanday baholanadi?",
+        options: [
+          "Taqiqlanadi",
+          "Ruxsat etiladi",
+          "Faqat kunduzi ruxsat",
+          "Faqat 10 metrda ruxsat"
+        ],
+        correct: 0
+      },
+      {
+        text: "Tungi parvozlar uchun nima talab qilinadi?",
+        options: ["Maxsus ruxsat", "Hech narsa", "Faqat chiroq", "Qo'shimcha batareya"],
+        correct: 0
+      }
+    ]
+  }
+];
+
 async function main(): Promise<void> {
   const adminPassword = process.env.SEED_ADMIN_PASSWORD ?? "Admin123!";
   const pilotPassword = process.env.SEED_PILOT_PASSWORD ?? "Pilot123!";
@@ -131,11 +369,12 @@ async function main(): Promise<void> {
 
   const course = await prisma.course.upsert({
     where: { slug: "fpv-asoslari" },
-    update: { published: true },
+    update: { published: true, coverUrl: "/images/course-fpv.png" },
     create: {
       slug: "fpv-asoslari",
       title: "FPV asoslari",
       description: "Noldan birinchi parvozgacha: qurilma, qoidalar va amaliyot",
+      coverUrl: "/images/course-fpv.png",
       published: true
     }
   });
@@ -155,11 +394,12 @@ async function main(): Promise<void> {
 
   const havoHuquqi = await prisma.course.upsert({
     where: { slug: "havo-huquqi" },
-    update: { published: true },
+    update: { published: true, coverUrl: "/images/course-law.png" },
     create: {
       slug: "havo-huquqi",
       title: "Havo huquqi va xavfsizlik",
       description: "O'zbekistonda BPLA bo'yicha huquqiy asoslar",
+      coverUrl: "/images/course-law.png",
       published: true
     }
   });
@@ -177,11 +417,86 @@ async function main(): Promise<void> {
     });
   }
 
+  for (const item of newsItems) {
+    await prisma.news.upsert({
+      where: { slug: item.slug },
+      update: {
+        title: item.title,
+        summary: item.summary,
+        body: item.body,
+        category: item.category,
+        coverUrl: item.cover,
+        published: true
+      },
+      create: {
+        slug: item.slug,
+        title: item.title,
+        summary: item.summary,
+        body: item.body,
+        category: item.category,
+        coverUrl: item.cover,
+        published: true
+      }
+    });
+  }
+
+  for (const product of products) {
+    await prisma.product.upsert({
+      where: { slug: product.slug },
+      update: {
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        price: product.price,
+        stock: product.stock,
+        imageUrl: product.imageUrl,
+        active: true
+      },
+      create: { ...product, active: true }
+    });
+  }
+
+  let quizzesCreated = 0;
+  for (const quiz of quizzes) {
+    const owner = await prisma.course.findUnique({ where: { slug: quiz.courseSlug } });
+    if (!owner) continue;
+
+    const lesson = await prisma.lesson.findUnique({
+      where: { courseId_position: { courseId: owner.id, position: quiz.position } }
+    });
+    if (!lesson) continue;
+
+    const record = await prisma.quiz.upsert({
+      where: { lessonId: lesson.id },
+      update: { title: quiz.title, passScore: quiz.passScore },
+      create: {
+        lessonId: lesson.id,
+        title: quiz.title,
+        passScore: quiz.passScore
+      }
+    });
+
+    await prisma.question.deleteMany({ where: { quizId: record.id } });
+    await prisma.question.createMany({
+      data: quiz.questions.map((question, index) => ({
+        quizId: record.id,
+        text: question.text,
+        options: question.options,
+        correct: question.correct,
+        position: index + 1
+      }))
+    });
+    quizzesCreated += 1;
+  }
+
   console.log("Seed tayyor:");
   console.log(`  admin: admin@uzdf.pro / ${adminPassword}`);
   console.log(`  pilot: pilot@uzdf.pro / ${pilotPassword}`);
   console.log(`  zonalar: 3 ta, kurs: ${course.title} (${lessons.length} dars)`);
   console.log(`  kurs 2: ${havoHuquqi.title} (${havoHuquqiLessons.length} dars)`);
+  console.log(`  yangiliklar: ${newsItems.length} ta`);
+  console.log(`  do'kon: ${products.length} ta mahsulot`);
+  console.log(`  testlar: ${quizzesCreated} ta quiz`);
   console.log(`  pilot id: ${pilot.id}`);
 }
 

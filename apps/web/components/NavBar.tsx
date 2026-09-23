@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { buttonClasses } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
-import { getTokens, logout } from "@/lib/api";
+import { logout } from "@/lib/api";
+import { useIsAuthed } from "@/lib/auth-store";
 
 const LINKS = [
   { href: "/", label: "Asosiy" },
   { href: "/academy", label: "Akademiya" },
   { href: "/zones", label: "Zonalar" },
+  { href: "/shop", label: "Do'kon" },
+  { href: "/news", label: "Yangiliklar" },
   { href: "/dashboard", label: "Kabinet" },
   { href: "/admin", label: "Admin" },
 ];
@@ -18,22 +21,11 @@ const LINKS = [
 export default function NavBar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [mounted, setMounted] = useState(false);
-  const [authed, setAuthed] = useState(false);
+  const authed = useIsAuthed();
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    setAuthed(Boolean(getTokens()));
-  }, [pathname]);
-
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
 
   async function handleLogout() {
     await logout();
-    setAuthed(false);
     router.push("/");
   }
 
@@ -41,11 +33,11 @@ export default function NavBar() {
     <header className="sticky top-0 z-50 border-b border-white/5 bg-neutral-950/70 backdrop-blur-xl">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-sky-400 to-violet-500 text-sm font-bold text-neutral-950">
-            U
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 text-sm font-bold text-neutral-950">
+            D
           </span>
           <span className="text-base font-semibold tracking-tight text-white">
-            UZDF <span className="text-sky-400">Pro</span>
+            DRON<span className="text-emerald-400">CHI</span>
           </span>
         </Link>
 
@@ -71,7 +63,7 @@ export default function NavBar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
-          {mounted && authed ? (
+          {authed ? (
             <button
               onClick={handleLogout}
               className={buttonClasses({ variant: "secondary", size: "sm" })}
@@ -123,6 +115,7 @@ export default function NavBar() {
               <Link
                 key={link.href}
                 href={link.href}
+                onClick={() => setOpen(false)}
                 className="rounded-lg px-3 py-2.5 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
               >
                 {link.label}
@@ -130,7 +123,7 @@ export default function NavBar() {
             ))}
           </nav>
           <div className="mt-3 flex gap-2 border-t border-white/5 pt-3">
-            {mounted && authed ? (
+            {authed ? (
               <button
                 onClick={handleLogout}
                 className={buttonClasses({ variant: "secondary", size: "sm", className: "flex-1" })}

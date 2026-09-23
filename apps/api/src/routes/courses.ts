@@ -62,6 +62,7 @@ export async function courseRoutes(app: FastifyInstance): Promise<void> {
           slug: course.slug,
           title: course.title,
           description: course.description,
+          coverUrl: course.coverUrl,
           lessonsCount: course._count.lessons
         }))
       };

@@ -53,6 +53,7 @@ export interface CourseSummary {
   slug: string;
   title: string;
   description: string | null;
+  coverUrl?: string | null;
   lessonsCount: number;
 }
 
@@ -61,6 +62,7 @@ export interface CourseDetail {
   slug: string;
   title: string;
   description: string | null;
+  coverUrl?: string | null;
   lessons: Lesson[];
 }
 
@@ -101,12 +103,36 @@ export function getTokens(): StoredTokens | null {
   }
 }
 
+/* --------------------------- Auth holati (store) --------------------------- */
+
+const authListeners = new Set<() => void>();
+
+/** Auth holati o'zgarishiga obuna bo'lish (useSyncExternalStore uchun). */
+export function subscribeAuth(listener: () => void): () => void {
+  authListeners.add(listener);
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", listener);
+  }
+  return () => {
+    authListeners.delete(listener);
+    if (typeof window !== "undefined") {
+      window.removeEventListener("storage", listener);
+    }
+  };
+}
+
+function notifyAuthChange(): void {
+  for (const listener of authListeners) listener();
+}
+
 export function setTokens(tokens: StoredTokens): void {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(tokens));
+  notifyAuthChange();
 }
 
 export function clearTokens(): void {
   window.localStorage.removeItem(STORAGE_KEY);
+  notifyAuthChange();
 }
 
 export async function api<T>(
@@ -115,16 +141,21 @@ export async function api<T>(
   auth = false
 ): Promise<T> {
   const headers: Record<string, string> = {
-    "content-type": "application/json",
     ...((options.headers as Record<string, string>) ?? {}),
   };
+
+  // Body bo'lmasa content-type yubormaymiz — aks holda Fastify bo'sh JSON
+  // body'ni xato deb hisoblaydi (POST/DELETE so'rovlari yiqiladi).
+  if (options.body !== undefined && options.body !== null) {
+    headers["content-type"] = headers["content-type"] ?? "application/json";
+  }
 
   if (auth) {
     const tokens = getTokens();
     if (tokens) headers.authorization = `Bearer ${tokens.accessToken}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const response = await fetchWithRetry(`${API_URL}${path}`, { ...options, headers });
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
@@ -134,6 +165,29 @@ export async function api<T>(
   }
 
   return data as T;
+}
+
+/**
+ * Tarmoq uzilishlariga chidamli fetch: GET so'rovlar qisqa kutish bilan
+ * qayta urinib ko'riladi (API qayta ishga tushayotganda "Failed to fetch" bo'lmasligi uchun).
+ */
+async function fetchWithRetry(url: string, options: RequestInit): Promise<Response> {
+  const method = (options.method ?? "GET").toUpperCase();
+  const attempts = method === "GET" ? 3 : 1;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await fetch(url, options);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+      }
+    }
+  }
+
+  throw lastError instanceof Error ? lastError : new Error("Tarmoq xatosi");
 }
 
 /* ----------------------------- Auth ----------------------------- */
@@ -273,6 +327,7 @@ export interface MyCourse {
   slug: string;
   title: string;
   description: string | null;
+  coverUrl?: string | null;
   lessonsCount: number;
   completedCount: number;
   percent: number;
@@ -339,4 +394,131 @@ export async function verifyCertificate(code: string): Promise<CertificateVerify
     `/api/v1/certificates/verify/${code}`
   );
   return data.certificate;
+}
+
+/* ------------------------ Yangiliklar (news) ------------------------ */
+
+export interface NewsItem {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  category: string | null;
+  coverUrl: string | null;
+  publishedAt: string;
+}
+
+export interface NewsDetail extends NewsItem {
+  body: string;
+}
+
+export async function getNews(category?: string): Promise<NewsItem[]> {
+  const query = category ? `?category=${encodeURIComponent(category)}` : "";
+  const data = await api<{ news: NewsItem[] }>(`/api/v1/news${query}`);
+  return data.news;
+}
+
+export async function getNewsItem(slug: string): Promise<NewsDetail> {
+  const data = await api<{ news: NewsDetail }>(`/api/v1/news/${slug}`);
+  return data.news;
+}
+
+/* --------------------------- Do'kon (shop) --------------------------- */
+
+export interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  price: number;
+  imageUrl: string | null;
+  stock: number;
+}
+
+export interface OrderItem {
+  id: string;
+  quantity: number;
+  total: number;
+  fullName: string;
+  phone: string;
+  address: string | null;
+  status: "NEW" | "CONFIRMED" | "DELIVERED" | "CANCELLED";
+  createdAt: string;
+  product: { slug: string; name: string; price: number };
+}
+
+export async function getProducts(): Promise<Product[]> {
+  const data = await api<{ products: Product[] }>("/api/v1/shop/products");
+  return data.products;
+}
+
+export async function createOrder(input: {
+  productId: string;
+  quantity: number;
+  fullName: string;
+  phone: string;
+  address?: string;
+}): Promise<OrderItem> {
+  const data = await api<{ order: OrderItem }>(
+    "/api/v1/shop/orders",
+    { method: "POST", body: JSON.stringify(input) },
+    true
+  );
+  return data.order;
+}
+
+export async function getMyOrders(): Promise<OrderItem[]> {
+  const data = await api<{ orders: OrderItem[] }>("/api/v1/shop/orders/me", {}, true);
+  return data.orders;
+}
+
+/* ---------------------------- Testlar (quiz) ---------------------------- */
+
+export interface QuizQuestion {
+  id: string;
+  text: string;
+  options: string[];
+}
+
+export interface LessonQuiz {
+  id: string;
+  title: string;
+  passScore: number;
+  questions: QuizQuestion[];
+}
+
+export interface QuizAttemptSummary {
+  score: number;
+  total: number;
+  passed: boolean;
+  createdAt: string;
+}
+
+export interface LessonQuizResponse {
+  quiz: LessonQuiz;
+  lastAttempt: QuizAttemptSummary | null;
+}
+
+export async function getLessonQuiz(lessonId: string): Promise<LessonQuizResponse> {
+  return api<LessonQuizResponse & { ok: true }>(
+    `/api/v1/quizzes/lesson/${lessonId}`,
+    {},
+    true
+  );
+}
+
+export async function submitQuiz(
+  quizId: string,
+  answers: number[]
+): Promise<{
+  attempt: { score: number; total: number; percent: number; passed: boolean };
+  expAwarded: number;
+  totalExp: number;
+}> {
+  return api(
+    `/api/v1/quizzes/${quizId}/submit`,
+    { method: "POST", body: JSON.stringify({ answers }) },
+    true
+  );
 }

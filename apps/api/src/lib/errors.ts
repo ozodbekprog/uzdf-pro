@@ -48,11 +48,24 @@ export function registerErrorHandler(app: FastifyInstance): void {
       });
     }
 
-    if ((error as { statusCode?: number }).statusCode === 429) {
-      return reply.status(429).send({
-        ok: false,
-        error: { code: "TOO_MANY_REQUESTS", message: "Juda ko'p so'rov, keyinroq urinib ko'ring" }
-      });
+    const statusCode = (error as { statusCode?: number }).statusCode;
+
+    if (typeof statusCode === "number" && statusCode >= 400 && statusCode < 500) {
+      const code =
+        statusCode === 429
+          ? "TOO_MANY_REQUESTS"
+          : statusCode === 415
+            ? "UNSUPPORTED_MEDIA_TYPE"
+            : statusCode === 413
+              ? "PAYLOAD_TOO_LARGE"
+              : "BAD_REQUEST";
+      const message =
+        statusCode === 429
+          ? "Juda ko'p so'rov, keyinroq urinib ko'ring"
+          : statusCode === 415
+            ? "Content-Type qo'llab-quvvatlanmaydi"
+            : "So'rov noto'g'ri formatda";
+      return reply.status(statusCode).send({ ok: false, error: { code, message } });
     }
 
     request.log.error(error);

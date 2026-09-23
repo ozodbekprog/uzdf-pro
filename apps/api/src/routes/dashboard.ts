@@ -123,6 +123,7 @@ export async function dashboardRoutes(app: FastifyInstance): Promise<void> {
           slug: course.slug,
           title: course.title,
           description: course.description,
+          coverUrl: course.coverUrl,
           lessonsCount,
           completedCount,
           percent: lessonsCount > 0 ? Math.round((completedCount / lessonsCount) * 100) : 0,

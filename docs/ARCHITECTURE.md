@@ -16,7 +16,7 @@ xavfsizroq va kengaytiriladigan qilib qurish. UZDF'dagi ishlaydigan g'oyalar
 | Validatsiya | Qo'lda | Zod sxemalari + yagona xatolik formati |
 | Rollar | user/moderator/admin/superadmin | PILOT/MODERATOR/ADMIN/SUPERADMIN, har amalda tekshiruv |
 | Baza | PostgreSQL + Prisma | Xuddi shunday + geo hisob-kitoblar servisda |
-| Testlar | Ko'rinmaydi | 13 ta Vitest testi (auth, zonalar, akademiya) |
+| Testlar | Ko'rinmaydi | 33 ta Vitest testi (auth, zonalar, akademiya, testlar) |
 | API hujjat | Yo'q | Swagger `/docs` |
 
 ## Modullar
