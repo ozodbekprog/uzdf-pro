@@ -10,6 +10,13 @@ import { AppError, registerErrorHandler } from "./lib/errors.js";
 import { prisma } from "./lib/prisma.js";
 import { registerAuth, registerPrisma } from "./plugins/plugins.js";
 import { authRoutes } from "./routes/auth.js";
+import { adminCertificateRoutes } from "./routes/admin-certificates.js";
+import { adminNewsRoutes } from "./routes/admin-news.js";
+import { adminOrderRoutes } from "./routes/admin-orders.js";
+import { adminProductRoutes } from "./routes/admin-products.js";
+import { adminQuizRoutes } from "./routes/admin-quizzes.js";
+import { adminStatsRoutes } from "./routes/admin-stats.js";
+import { adminUserRoutes } from "./routes/admin-users.js";
 import { certificateRoutes } from "./routes/certificates.js";
 import { courseRoutes } from "./routes/courses.js";
 import { dashboardRoutes, ratingRoutes } from "./routes/dashboard.js";
@@ -83,7 +90,8 @@ export async function buildApp(): Promise<FastifyInstance> {
         { name: "courses", description: "Akademiya va progress" },
         { name: "quizzes", description: "Dars testlari va baholash" },
         { name: "news", description: "Soha yangiliklari" },
-        { name: "shop", description: "Dron do'koni va buyurtmalar" }
+        { name: "shop", description: "Dron do'koni va buyurtmalar" },
+        { name: "admin", description: "Admin panel: boshqaruv va statistika" }
       ],
       components: {
         securitySchemes: {
@@ -108,6 +116,14 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(quizRoutes, { prefix: "/api/v1/quizzes" });
   await app.register(newsRoutes, { prefix: "/api/v1/news" });
   await app.register(shopRoutes, { prefix: "/api/v1/shop" });
+
+  await app.register(adminStatsRoutes, { prefix: "/api/v1/admin/stats" });
+  await app.register(adminUserRoutes, { prefix: "/api/v1/admin/users" });
+  await app.register(adminNewsRoutes, { prefix: "/api/v1/admin/news" });
+  await app.register(adminProductRoutes, { prefix: "/api/v1/admin/products" });
+  await app.register(adminOrderRoutes, { prefix: "/api/v1/admin/orders" });
+  await app.register(adminQuizRoutes, { prefix: "/api/v1/admin/quizzes" });
+  await app.register(adminCertificateRoutes, { prefix: "/api/v1/admin/certificates" });
 
   return app;
 }

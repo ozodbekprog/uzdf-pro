@@ -1,513 +1,271 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import Alert from "@/components/ui/Alert";
-import Badge, { type BadgeTone } from "@/components/ui/Badge";
-import Button, { buttonClasses } from "@/components/ui/Button";
+import Badge from "@/components/ui/Badge";
+import { buttonClasses } from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import EmptyState from "@/components/ui/EmptyState";
-import { Field, Input, Select, Textarea } from "@/components/ui/Field";
 import PageHeader from "@/components/ui/PageHeader";
 import Skeleton from "@/components/ui/Skeleton";
 import StatCard from "@/components/ui/StatCard";
-import { cn } from "@/lib/cn";
 import {
-  createZone,
-  deleteZone,
-  getManagedZones,
-  getMe,
-  getTokens,
-  getZoneStats,
-  updateZone,
-  type PublicUser,
-  type Zone,
-  type ZoneInput,
-  type ZoneStats,
-  type ZoneType,
-} from "@/lib/api";
+  getAdminOrders,
+  getAdminStats,
+  type AdminOrder,
+  type AdminStats,
+} from "@/lib/admin-api";
 
-const ZoneEditor = dynamic(() => import("@/components/ZoneEditor"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full items-center justify-center text-sm text-neutral-500">
-      Xarita yuklanmoqda...
-    </div>
-  ),
-});
-
-const MANAGER_ROLES = ["MODERATOR", "ADMIN", "SUPERADMIN"];
-
-const TYPE_TONES: Record<ZoneType, BadgeTone> = {
-  RED: "red",
-  YELLOW: "amber",
-  GREEN: "emerald",
-};
+const som = new Intl.NumberFormat("uz-UZ");
 
 const SHELL = "mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10";
 
-type Access = "checking" | "anon" | "denied" | "ready";
+const STATUS_LABEL: Record<AdminOrder["status"], string> = {
+  NEW: "Yangi",
+  CONFIRMED: "Tasdiqlangan",
+  DELIVERED: "Yetkazilgan",
+  CANCELLED: "Bekor qilingan",
+};
 
-export default function AdminPage() {
-  const [access, setAccess] = useState<Access>("checking");
-  const [user, setUser] = useState<PublicUser | null>(null);
-  const [zones, setZones] = useState<Zone[]>([]);
-  const [stats, setStats] = useState<ZoneStats | null>(null);
+const STATUS_TONE: Record<AdminOrder["status"], "amber" | "sky" | "emerald" | "red"> = {
+  NEW: "amber",
+  CONFIRMED: "sky",
+  DELIVERED: "emerald",
+  CANCELLED: "red",
+};
+
+const QUICK_LINKS = [
+  { href: "/admin/users", label: "Foydalanuvchilar" },
+  { href: "/admin/courses", label: "Kurslar" },
+  { href: "/admin/news", label: "Yangiliklar" },
+  { href: "/admin/products", label: "Mahsulotlar" },
+];
+
+export default function AdminDashboardPage() {
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [type, setType] = useState<ZoneType>("YELLOW");
-  const [description, setDescription] = useState("");
-  const [active, setActive] = useState(true);
-  const [points, setPoints] = useState<[number, number][]>([]);
-
-  const refresh = useCallback(async () => {
-    const [nextZones, nextStats] = await Promise.all([
-      getManagedZones(),
-      getZoneStats(),
-    ]);
-    setZones(nextZones);
-    setStats(nextStats);
-  }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    let active = true;
 
-    async function load() {
-      if (!getTokens()) {
-        setAccess("anon");
-        return;
-      }
+    Promise.all([getAdminStats(), getAdminOrders()])
+      .then(([statsData, ordersData]) => {
+        if (!active) return;
+        setStats(statsData);
+        setOrders(ordersData.slice(0, 5));
+      })
+      .catch((reason: unknown) => {
+        if (!active) return;
+        setError(
+          reason instanceof Error ? reason.message : "Ma'lumotlarni yuklab bo'lmadi"
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
-      try {
-        const me = await getMe();
-        if (cancelled) return;
-        if (!MANAGER_ROLES.includes(me.role)) {
-          setAccess("denied");
-          return;
-        }
-        setUser(me);
-        setAccess("ready");
-        await refresh();
-      } catch (err) {
-        if (cancelled) return;
-        setError((err as Error).message);
-        setAccess("anon");
-      }
-    }
-
-    load();
     return () => {
-      cancelled = true;
+      active = false;
     };
-  }, [refresh]);
-
-  const resetDraft = useCallback(() => {
-    setEditingId(null);
-    setName("");
-    setType("YELLOW");
-    setDescription("");
-    setActive(true);
-    setPoints([]);
   }, []);
 
-  const addPoint = useCallback((point: [number, number]) => {
-    setPoints((prev) => [...prev, point]);
-  }, []);
-
-  function startEdit(zone: Zone) {
-    setEditingId(zone.id);
-    setName(zone.name);
-    setType(zone.type);
-    setDescription(zone.description ?? "");
-    setActive(zone.active);
-    setPoints(zone.polygon);
-    setError(null);
-    setSuccess(null);
-  }
-
-  function handleRefresh() {
-    setError(null);
-    setSuccess(null);
-    refresh().catch((err: Error) => setError(err.message));
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const canSave = name.trim().length > 0 && points.length >= 3 && !saving;
-    if (!canSave) return;
-
-    setSaving(true);
-    setError(null);
-    setSuccess(null);
-
-    const input: ZoneInput = {
-      name: name.trim(),
-      type,
-      description: description.trim() ? description.trim() : undefined,
-      polygon: points,
-      active,
-    };
-
-    try {
-      if (editingId) {
-        await updateZone(editingId, input);
-        setSuccess("Zona yangilandi.");
-      } else {
-        await createZone(input);
-        setSuccess("Yangi zona qo'shildi.");
-      }
-      resetDraft();
-      await refresh();
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setSaving(false);
+  const warnings: string[] = [];
+  if (stats) {
+    if (stats.products.outOfStock > 0) {
+      warnings.push(`${stats.products.outOfStock} ta mahsulot ombordan tugagan.`);
     }
-  }
-
-  async function handleDelete(zone: Zone) {
-    if (!window.confirm(`"${zone.name}" zonasini o'chirishni tasdiqlaysizmi?`)) {
-      return;
+    if (stats.orders.new > 0) {
+      warnings.push(
+        `${stats.orders.new} ta yangi buyurtma tasdiqlashni kutmoqda.`
+      );
     }
-
-    setError(null);
-    setSuccess(null);
-    try {
-      await deleteZone(zone.id);
-      if (editingId === zone.id) resetDraft();
-      await refresh();
-      setSuccess("Zona o'chirildi.");
-    } catch (err) {
-      setError((err as Error).message);
-    }
-  }
-
-  if (access === "checking") {
-    return (
-      <main className={SHELL}>
-        <Card className="fade-up mx-auto max-w-2xl p-6" glow>
-          <Skeleton className="h-7 w-48" />
-          <Skeleton className="mt-2 h-4 w-72" />
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <Skeleton className="h-24" />
-            <Skeleton className="h-24" />
-            <Skeleton className="h-24" />
-            <Skeleton className="h-24" />
-          </div>
-          <p className="mt-6 text-center text-sm text-neutral-400">
-            Tekshirilmoqda...
-          </p>
-        </Card>
-      </main>
-    );
-  }
-
-  if (access === "anon") {
-    return (
-      <main className={SHELL}>
-        <Card className="fade-up mx-auto max-w-md p-6" glow>
-          <h1 className="text-xl font-semibold text-white">
-            Bu sahifa uchun tizimga kiring
-          </h1>
-          <p className="mt-2 text-sm text-neutral-400">
-            Zonalarni boshqarish uchun hisobingizga kiring.
-          </p>
-          {error ? (
-            <Alert tone="error" className="mt-4">
-              {error}
-            </Alert>
-          ) : null}
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Link href="/login" className={buttonClasses({ size: "md" })}>
-              Kirish
-            </Link>
-            <Link
-              href="/"
-              className={buttonClasses({ variant: "secondary", size: "md" })}
-            >
-              Bosh sahifa
-            </Link>
-          </div>
-        </Card>
-      </main>
-    );
-  }
-
-  if (access === "denied") {
-    return (
-      <main className={SHELL}>
-        <Card className="fade-up mx-auto max-w-md border-amber-500/40 bg-amber-500/5 p-6 text-center">
-          <h1 className="text-xl font-semibold text-amber-300">
-            Ruxsat yo&apos;q
-          </h1>
-          <p className="mt-2 text-sm text-neutral-300">
-            Bu sahifa faqat moderator va administratorlar uchun.
-          </p>
-          <Link
-            href="/"
-            className={cn(
-              buttonClasses({ variant: "secondary", size: "sm" }),
-              "mt-5"
-            )}
-          >
-            Bosh sahifaga qaytish
-          </Link>
-        </Card>
-      </main>
-    );
   }
 
   return (
-    <main className={SHELL}>
+    <div className={SHELL}>
       <PageHeader
         className="fade-up"
-        title="Admin panel"
-        subtitle="Zonalarni boshqarish va statistika"
-        actions={
-          <>
-            {user ? (
-              <Badge tone="sky">
-                {user.fullName} · {user.role}
-              </Badge>
-            ) : null}
-            <Link
-              href="/zones"
-              className={buttonClasses({ variant: "secondary", size: "sm" })}
-            >
-              Zonalar xaritasi
-            </Link>
-            <Link
-              href="/"
-              className={buttonClasses({ variant: "secondary", size: "sm" })}
-            >
-              Bosh sahifa
-            </Link>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={handleRefresh}
-            >
-              Yangilash
-            </Button>
-          </>
-        }
+        title="Umumiy holat"
+        subtitle="Platforma bo'yicha joriy ko'rsatkichlar"
       />
 
-      <section className="fade-up mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Jami" value={stats?.total ?? 0} hint="Barcha zonalar" />
-        <StatCard
-          label="Faol"
-          value={stats?.active ?? 0}
-          accent="emerald"
-          hint="Faol zonalar"
-        />
-        <StatCard
-          label="RED"
-          value={stats?.byType.RED ?? 0}
-          accent="red"
-          hint="Qizil zona"
-        />
-        <StatCard
-          label="YELLOW + GREEN"
-          value={(stats?.byType.YELLOW ?? 0) + (stats?.byType.GREEN ?? 0)}
-          accent="amber"
-          hint={`YELLOW ${stats?.byType.YELLOW ?? 0} · GREEN ${stats?.byType.GREEN ?? 0}`}
-        />
-      </section>
-
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <Card className="fade-up overflow-hidden">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-5 py-4">
-            <h2 className="font-medium text-white">Xarita muharriri</h2>
-            <div className="flex items-center gap-2">
-              <Badge tone="neutral">Nuqtalar: {points.length}</Badge>
-              {editingId ? <Badge tone="sky">Tahrirlanmoqda</Badge> : null}
+      <div className="mt-6 flex flex-col gap-6">
+        {loading ? (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {Array.from({ length: 12 }).map((_, index) => (
+                <Skeleton key={index} className="h-24" />
+              ))}
             </div>
-          </div>
-          <div className="h-[70vh] min-h-[420px]">
-            <ZoneEditor
-              zones={zones}
-              points={points}
-              onAddPoint={addPoint}
-              activeType={type}
-              editingId={editingId}
-            />
-          </div>
-        </Card>
-
-        <Card className="fade-up h-fit p-5">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-white">
-              {editingId ? "Zonani tahrirlash" : "Yangi zona"}
-            </h2>
-            {editingId ? <Badge tone="sky">Tahrirlanmoqda</Badge> : null}
-          </div>
-
-          {error ? (
-            <Alert tone="error" className="mt-4">
-              {error}
-            </Alert>
-          ) : null}
-
-          {success ? (
-            <Alert tone="success" className="mt-4">
-              {success}
-            </Alert>
-          ) : null}
-
-          <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-4">
-            <Field label="Nomi">
-              <Input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Masalan: Toshkent markaziy zonasi"
-              />
-            </Field>
-
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="Turi">
-                <Select
-                  value={type}
-                  onChange={(event) => setType(event.target.value as ZoneType)}
-                >
-                  <option value="RED">RED</option>
-                  <option value="YELLOW">YELLOW</option>
-                  <option value="GREEN">GREEN</option>
-                </Select>
-              </Field>
-
-              <label className="flex cursor-pointer items-center gap-2 self-end rounded-xl border border-white/10 bg-neutral-950/60 px-3.5 py-2.5 text-sm transition hover:border-sky-400/40">
-                <input
-                  type="checkbox"
-                  checked={active}
-                  onChange={(event) => setActive(event.target.checked)}
-                  className="h-4 w-4 accent-sky-500"
-                />
-                <span className="font-medium text-neutral-300">Faol</span>
-              </label>
+            <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+              <Skeleton className="h-72 w-full rounded-2xl" />
+              <Skeleton className="h-72 w-full rounded-2xl" />
             </div>
-
-            <Field label="Tavsif">
-              <Textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                rows={3}
-              />
-            </Field>
-
-            <p className="text-xs text-neutral-500">
-              Xaritaga bosib nuqta qo&apos;shing (kamida 3 ta). Nuqtalar:{" "}
-              {points.length}
-            </p>
-
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                type="submit"
-                disabled={
-                  name.trim().length === 0 || points.length < 3 || saving
-                }
-              >
-                {saving ? "Saqlanmoqda..." : "Saqlash"}
-              </Button>
-              <Button type="button" variant="secondary" onClick={resetDraft}>
-                Bekor qilish
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setPoints((prev) => prev.slice(0, -1))}
-                disabled={points.length === 0}
-                className="text-red-300 hover:bg-red-500/10 hover:text-red-200"
-              >
-                Oxirgi nuqtani o&apos;chirish
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setPoints([])}
-                disabled={points.length === 0}
-                className="text-red-300 hover:bg-red-500/10 hover:text-red-200"
-              >
-                Tozalash
-              </Button>
-            </div>
-          </form>
-        </Card>
-      </div>
-
-      <Card className="fade-up mt-6 overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-5 py-4">
-          <h2 className="font-medium text-white">Zonalar ro&apos;yxati</h2>
-          <Badge tone="neutral">{zones.length} ta</Badge>
-        </div>
-
-        {zones.length === 0 ? (
-          <div className="p-5">
-            <EmptyState
-              title="Zonalar topilmadi"
-              description="Hozircha hech qanday zona yo'q. Yangi zona qo'shish uchun yuqoridagi formadan foydalaning."
-            />
-          </div>
+          </>
+        ) : error || !stats ? (
+          <Alert tone="error">
+            {error ?? "Ma'lumotlarni yuklab bo'lmadi. Sahifani qayta yuklang."}
+          </Alert>
         ) : (
-          <div className="divide-y divide-white/5">
-            {zones.map((zone) => (
-              <div
-                key={zone.id}
-                className={cn(
-                  "flex flex-wrap items-center justify-between gap-3 px-5 py-4 transition",
-                  editingId === zone.id ? "bg-sky-500/5" : "hover:bg-white/[0.02]"
-                )}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="truncate font-medium text-neutral-100">
-                      {zone.name}
-                    </p>
-                    <Badge tone={TYPE_TONES[zone.type]}>{zone.type}</Badge>
-                    <Badge tone={zone.active ? "emerald" : "neutral"}>
-                      {zone.active ? "Faol" : "Nofaol"}
-                    </Badge>
-                  </div>
-                  {zone.description ? (
-                    <p className="mt-0.5 max-w-md truncate text-xs text-neutral-500">
-                      {zone.description}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-neutral-500">
-                    {zone.polygon.length} nuqta
-                  </span>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => startEdit(zone)}
-                  >
-                    Tahrirlash
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="danger"
-                    size="sm"
-                    onClick={() => handleDelete(zone)}
-                  >
-                    O&apos;chirish
-                  </Button>
-                </div>
+          <>
+            {warnings.length > 0 ? (
+              <div className="fade-up flex flex-col gap-3">
+                {warnings.map((warning) => (
+                  <Alert key={warning} tone="warning">
+                    {warning}
+                  </Alert>
+                ))}
               </div>
-            ))}
-          </div>
+            ) : null}
+
+            <section className="fade-up grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              <StatCard
+                label="Foydalanuvchilar"
+                value={stats.users.total}
+                hint={`Shu haftada +${stats.users.newThisWeek}`}
+                accent="sky"
+              />
+              <StatCard
+                label="Kurslar"
+                value={`${stats.courses.published}/${stats.courses.total}`}
+                hint="Nashr etilgan / jami"
+                accent="emerald"
+              />
+              <StatCard
+                label="Darslar"
+                value={stats.courses.lessons}
+                hint="Barcha kurslar bo'yicha"
+                accent="amber"
+              />
+              <StatCard
+                label="Testlar"
+                value={stats.quizzes.total}
+                hint="Jami testlar"
+                accent="violet"
+              />
+              <StatCard
+                label="Savollar"
+                value={stats.quizzes.questions}
+                hint="Testlardagi savollar"
+                accent="red"
+              />
+              <StatCard
+                label="Test urinishlari"
+                value={stats.quizzes.attempts}
+                hint={`${stats.quizzes.passed} ta muvaffaqiyatli`}
+                accent="sky"
+              />
+              <StatCard
+                label="Yangiliklar"
+                value={stats.news.published}
+                hint={`Jami ${stats.news.total} ta`}
+                accent="emerald"
+              />
+              <StatCard
+                label="Mahsulotlar"
+                value={stats.products.active}
+                hint={`Jami ${stats.products.total} ta`}
+                accent="amber"
+              />
+              <StatCard
+                label="Buyurtmalar"
+                value={stats.orders.total}
+                hint={`${stats.orders.new} ta yangi`}
+                accent="violet"
+              />
+              <StatCard
+                label="Tushum"
+                value={`${som.format(stats.orders.revenue)} so'm`}
+                hint={`${stats.orders.delivered} ta yetkazilgan`}
+                accent="red"
+              />
+              <StatCard
+                label="Geozonalar"
+                value={stats.zones.active}
+                hint={`Jami ${stats.zones.total} ta`}
+                accent="sky"
+              />
+              <StatCard
+                label="Sertifikatlar"
+                value={stats.certificates.total}
+                hint="Berilgan sertifikatlar"
+                accent="emerald"
+              />
+            </section>
+
+            <div className="fade-up grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+              <Card className="overflow-hidden">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/5 px-5 py-4">
+                  <h2 className="font-medium text-white">So&apos;nggi buyurtmalar</h2>
+                  <Link
+                    href="/admin/orders"
+                    className="text-sm font-medium text-emerald-400 transition hover:text-emerald-300"
+                  >
+                    Barchasi
+                  </Link>
+                </div>
+
+                {orders.length === 0 ? (
+                  <p className="px-5 py-6 text-sm text-neutral-500">
+                    Hozircha buyurtmalar yo&apos;q.
+                  </p>
+                ) : (
+                  <ul className="divide-y divide-white/5">
+                    {orders.map((order) => (
+                      <li
+                        key={order.id}
+                        className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 transition hover:bg-white/[0.02]"
+                      >
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <span className="truncate text-sm font-medium text-white">
+                            {order.product.name}
+                          </span>
+                          <span className="mt-0.5 truncate text-xs text-neutral-500">
+                            {order.user.fullName} · {order.quantity} dona ·{" "}
+                            {new Date(order.createdAt).toLocaleDateString("uz-UZ")}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-medium text-neutral-200">
+                            {som.format(order.total)} so&apos;m
+                          </span>
+                          <Badge tone={STATUS_TONE[order.status]}>
+                            {STATUS_LABEL[order.status]}
+                          </Badge>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Card>
+
+              <Card className="flex h-fit flex-col gap-4 p-5">
+                <h2 className="font-medium text-white">Tezkor havolalar</h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                  {QUICK_LINKS.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={buttonClasses({
+                        variant: "secondary",
+                        size: "md",
+                        className: "justify-between",
+                      })}
+                    >
+                      <span>{link.label}</span>
+                      <span aria-hidden="true" className="text-neutral-500">
+                        →
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </>
         )}
-      </Card>
-    </main>
+      </div>
+    </div>
   );
 }

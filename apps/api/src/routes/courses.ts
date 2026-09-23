@@ -10,6 +10,7 @@ const courseBodySchema = z.object({
   slug: z.string().trim().min(2),
   title: z.string().trim().min(2),
   description: z.string().optional(),
+  coverUrl: z.string().trim().max(2048).optional(),
   published: z.boolean().optional()
 });
 
@@ -93,6 +94,71 @@ export async function courseRoutes(app: FastifyInstance): Promise<void> {
       });
 
       return { ok: true, count: progress.length, progress };
+    }
+  );
+
+  app.get(
+    "/manage/all",
+    {
+      preHandler: [app.authenticate, app.authorize("ADMIN", "SUPERADMIN")],
+      schema: {
+        tags: ["courses"],
+        summary: "Barcha kurslar, qoralamalar bilan (admin+)"
+      }
+    },
+    async () => {
+      const courses = await app.prisma.course.findMany({
+        orderBy: { createdAt: "asc" },
+        include: { _count: { select: { lessons: true } } }
+      });
+
+      return {
+        ok: true,
+        count: courses.length,
+        courses: courses.map((course) => ({
+          id: course.id,
+          slug: course.slug,
+          title: course.title,
+          description: course.description,
+          coverUrl: course.coverUrl,
+          published: course.published,
+          lessonsCount: course._count.lessons
+        }))
+      };
+    }
+  );
+
+  app.get(
+    "/manage/:slug",
+    {
+      preHandler: [app.authenticate, app.authorize("ADMIN", "SUPERADMIN")],
+      schema: {
+        tags: ["courses"],
+        summary: "Kurs tafsiloti, qoralama bo'lsa ham (admin+)"
+      }
+    },
+    async (request) => {
+      const { slug } = z.object({ slug: z.string().min(1) }).parse(request.params);
+
+      const course = await app.prisma.course.findUnique({
+        where: { slug },
+        include: {
+          lessons: {
+            orderBy: { position: "asc" },
+            select: {
+              id: true,
+              title: true,
+              content: true,
+              videoUrl: true,
+              position: true,
+              minReadSeconds: true
+            }
+          }
+        }
+      });
+
+      if (!course) throw notFound("Kurs topilmadi");
+      return { ok: true, course };
     }
   );
 

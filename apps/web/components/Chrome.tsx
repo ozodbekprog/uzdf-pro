@@ -9,8 +9,8 @@ import { useIsAuthed } from "@/lib/auth-store";
 /** Kirish/ro'yxatdan o'tish sahifalari — har doim yengil (NavBar) ko'rinishda. */
 const AUTH_ROUTES = ["/login", "/register"];
 
-/** Bu sahifalar AppShell'ni o'zi ichida ishlatadi. */
-const SELF_SHELL_ROUTES = ["/dashboard", "/my-courses", "/certificates", "/rating"];
+/** Bu sahifalar AppShell'ni o'zi ichida ishlatadi (admin o'z qobig'iga ega). */
+const SELF_SHELL_ROUTES = ["/dashboard", "/my-courses", "/certificates", "/rating", "/admin"];
 
 function matches(pathname: string, routes: string[]): boolean {
   return routes.some(

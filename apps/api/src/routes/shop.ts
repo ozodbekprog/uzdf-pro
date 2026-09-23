@@ -3,7 +3,6 @@ import { z } from "zod";
 import { badRequest, notFound } from "../lib/errors.js";
 
 const slugParamsSchema = z.object({ slug: z.string().trim().min(1) });
-const orderParamsSchema = z.object({ id: z.string().uuid() });
 
 const listQuerySchema = z.object({
   category: z.string().trim().min(1).optional(),
@@ -16,10 +15,6 @@ const orderBodySchema = z.object({
   fullName: z.string().trim().min(2),
   phone: z.string().trim().min(9),
   address: z.string().trim().optional()
-});
-
-const orderStatusSchema = z.object({
-  status: z.enum(["NEW", "CONFIRMED", "DELIVERED", "CANCELLED"])
 });
 
 export async function shopRoutes(app: FastifyInstance): Promise<void> {
@@ -126,24 +121,6 @@ export async function shopRoutes(app: FastifyInstance): Promise<void> {
       });
 
       return { ok: true, count: orders.length, orders };
-    }
-  );
-
-  app.patch(
-    "/orders/:id",
-    {
-      preHandler: [app.authenticate, app.authorize("MODERATOR", "ADMIN", "SUPERADMIN")],
-      schema: { tags: ["shop"], summary: "Buyurtma holatini o'zgartirish (moderator+)" }
-    },
-    async (request) => {
-      const { id } = orderParamsSchema.parse(request.params);
-      const { status } = orderStatusSchema.parse(request.body);
-
-      const existing = await app.prisma.order.findUnique({ where: { id } });
-      if (!existing) throw notFound("Buyurtma topilmadi");
-
-      const order = await app.prisma.order.update({ where: { id }, data: { status } });
-      return { ok: true, order };
     }
   );
 }
