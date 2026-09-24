@@ -1,127 +1,145 @@
-import React, { useEffect, useState } from "react";
-import { Button, Linking, ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Image, Pressable, RefreshControl, StyleSheet } from "react-native";
 import {
-  completeLesson,
-  getCourse,
+  getApiUrl,
   getCourses,
   isLoggedIn,
-  type CourseDetail,
   type CourseSummary,
 } from "../api";
-import { Card, ErrorText, H1, H2, Loader, Muted, colors } from "../components/ui";
+import {
+  Badge,
+  Body,
+  Button,
+  Card,
+  EmptyState,
+  ErrorText,
+  H1,
+  H2,
+  H3,
+  Loader,
+  Muted,
+  Row,
+  Screen,
+  colors,
+} from "../components/ui";
 
-export default function AcademyScreen() {
-  const [courses, setCourses] = useState<CourseSummary[]>([]);
-  const [detail, setDetail] = useState<CourseDetail | null>(null);
+/** API `coverUrl` ni qaytaradi, lekin `CourseSummary` tipida hozircha yo'q. */
+type CourseListItem = CourseSummary & { coverUrl?: string | null };
+
+export default function AcademyScreen({
+  onOpenCourse,
+}: {
+  onOpenCourse: (slug: string) => void;
+}) {
+  const [courses, setCourses] = useState<CourseListItem[]>([]);
+  const [apiUrl, setApiUrl] = useState("");
+  const [logged, setLogged] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
-  const [logged, setLogged] = useState(false);
+
+  const load = useCallback(async () => {
+    try {
+      setError(null);
+      const [url, list, auth] = await Promise.all([
+        getApiUrl(),
+        getCourses(),
+        isLoggedIn(),
+      ]);
+      setApiUrl(url);
+      setCourses(list);
+      setLogged(auth);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Xatolik");
+    }
+  }, []);
 
   useEffect(() => {
     (async () => {
-      try {
-        setLogged(await isLoggedIn());
-        setCourses(await getCourses());
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Xatolik");
-      } finally {
-        setLoading(false);
-      }
+      setLoading(true);
+      await load();
+      setLoading(false);
     })();
-  }, []);
+  }, [load]);
 
-  async function openCourse(slug: string) {
-    setError(null);
-    try {
-      setDetail(await getCourse(slug));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Xatolik");
-    }
-  }
-
-  async function onComplete(lessonId: string) {
-    setBusy(lessonId);
-    setError(null);
-    try {
-      const res = await completeLesson(lessonId);
-      setError(null);
-      if (detail) {
-        // локально помечаем урок выполненным повторным запросом курса
-        setDetail(await getCourse(detail.slug));
-      }
-      alert(
-        res.alreadyCompleted
-          ? "Bu dars allaqachon yakunlangan."
-          : `Tabriklaymiz! +${res.expAwarded} EXP`
-      );
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Xatolik");
-    } finally {
-      setBusy(null);
-    }
+  async function onRefresh() {
+    setRefreshing(true);
+    await load();
+    setRefreshing(false);
   }
 
   if (loading) return <Loader />;
 
-  if (detail) {
-    return (
-      <ScrollView style={styles.wrap} contentContainerStyle={styles.content}>
-        <Button title="← Kurslar" onPress={() => setDetail(null)} color={colors.primary} />
-        <H1>{detail.title}</H1>
-        {detail.description ? <Muted>{detail.description}</Muted> : null}
-        <ErrorText message={error} />
-        {detail.lessons.map((l) => (
-          <Card key={l.id}>
-            <H2>
-              {l.position}. {l.title}
-            </H2>
-            <Muted numberOfLines={4}>{l.content}</Muted>
-            {l.videoUrl ? (
-              <View style={styles.link}>
-                <Button title="Videoni ochish" onPress={() => Linking.openURL(l.videoUrl!)} color={colors.primary} />
-              </View>
-            ) : null}
-            <View style={styles.link}>
-              <Button
-                title={busy === l.id ? "Yuborilmoqda..." : "Yakunlash (+EXP)"}
-                onPress={() => onComplete(l.id)}
-                disabled={busy !== null || !logged}
-                color={colors.primary}
-              />
-            </View>
-            {!logged && <Muted>Kirish qilinmagan — yakunlash uchun Kabinet'da kiring.</Muted>}
-          </Card>
-        ))}
-      </ScrollView>
-    );
-  }
-
   return (
-    <ScrollView style={styles.wrap} contentContainerStyle={styles.content}>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          tintColor={colors.primary}
+        />
+      }
+    >
       <H1>Akademiya</H1>
-      <Muted>Video darslar, progress va EXP.</Muted>
+      <Muted>Video va matnli darslar — har bir dars uchun EXP.</Muted>
+
       <ErrorText message={error} />
-      {courses.map((c) => (
-        <Card key={c.id}>
-          <Text style={styles.title} onPress={() => openCourse(c.slug)}>
-            {c.title}
-          </Text>
-          {c.description ? <Muted numberOfLines={2}>{c.description}</Muted> : null}
-          <Muted>Darslar: {c.lessonsCount}</Muted>
-          <View style={styles.link}>
-            <Button title="Ochish" onPress={() => openCourse(c.slug)} color={colors.primary} />
-          </View>
+
+      {!logged ? (
+        <Card>
+          <Row style={styles.warningHead}>
+            <Badge label="Diqqat" tone="warning" />
+          </Row>
+          <H3>Progressni saqlash uchun tizimga kiring</H3>
+          <Body>Kabinet bo'limida kiring — natijalar va EXP saqlanadi.</Body>
         </Card>
-      ))}
-      {courses.length === 0 && <Muted>Hozircha kurslar yo'q.</Muted>}
-    </ScrollView>
+      ) : null}
+
+      {courses.length === 0 ? (
+        <EmptyState
+          title="Kurslar yo'q"
+          description="Hozircha mavjud kurslar topilmadi."
+        />
+      ) : (
+        courses.map((c) => (
+          <Pressable
+            key={c.id}
+            onPress={() => onOpenCourse(c.slug)}
+            style={({ pressed }) => (pressed ? styles.pressed : undefined)}
+          >
+            <Card>
+              {c.coverUrl ? (
+                <Image
+                  source={{ uri: `${apiUrl}${c.coverUrl}` }}
+                  style={styles.cover}
+                  resizeMode="cover"
+                />
+              ) : null}
+              <H2>{c.title}</H2>
+              {c.description ? (
+                <Muted numberOfLines={2}>{c.description}</Muted>
+              ) : null}
+              <Row style={styles.badgeRow}>
+                <Badge label={`${c.lessonsCount} ta dars`} tone="primary" />
+              </Row>
+              <Button
+                title="Kursni ochish"
+                variant="secondary"
+                onPress={() => onOpenCourse(c.slug)}
+                style={styles.openButton}
+              />
+            </Card>
+          </Pressable>
+        ))
+      )}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, paddingBottom: 40 },
-  title: { fontSize: 17, fontWeight: "700", color: colors.primary, marginBottom: 4 },
-  link: { marginTop: 8 },
+  warningHead: { marginBottom: 8 },
+  cover: { height: 140, borderRadius: 12, width: "100%", marginBottom: 12 },
+  badgeRow: { marginTop: 10 },
+  openButton: { marginTop: 12 },
+  pressed: { opacity: 0.9 },
 });

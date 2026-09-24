@@ -1,15 +1,22 @@
 {
   "expo": {
-    "name": "UZDF Pro",
-    "slug": "uzdfpro",
-    "version": "0.1.0",
+    "name": "DRONCHI",
+    "slug": "dronchi",
+    "version": "0.2.0",
     "orientation": "portrait",
-    "primaryColor": "#0f766e",
+    "primaryColor": "#34d399",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#050a17",
+    "splash": {
+      "backgroundColor": "#050a17",
+      "resizeMode": "contain"
+    },
     "android": {
-      "package": "pro.uzdf.app"
+      "package": "pro.dronchi.app"
     },
     "ios": {
-      "bundleIdentifier": "pro.uzdf.app"
+      "bundleIdentifier": "pro.dronchi.app",
+      "supportsTablet": true
     },
     "plugins": [
       "expo-asset"

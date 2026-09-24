@@ -8,7 +8,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
  * Адрес API по умолчанию — LAN-IP этой машины, меняется на экране "Bosh sahifa".
  */
 
-export const DEFAULT_API_URL = "http://190.191.8.185:4000";
+export const DEFAULT_API_URL = "https://dronchi-api.vercel.app";
 
 const API_URL_KEY = "uzdfpro.apiUrl";
 const TOKENS_KEY = "uzdfpro.tokens";
@@ -230,4 +230,186 @@ export async function completeLesson(
 
 export async function getDashboard(): Promise<DashboardData> {
   return api<DashboardData>("/api/v1/dashboard/me", {}, true);
+}
+
+/* ---------------- O'quv jarayoni ---------------- */
+
+export async function startLesson(lessonId: string): Promise<void> {
+  await api(`/api/v1/courses/lessons/${lessonId}/start`, { method: "POST" }, true);
+}
+
+export interface LessonProgress {
+  id: string;
+  startedAt: string;
+  completedAt: string | null;
+  lesson: {
+    id: string;
+    title: string;
+    position: number;
+    minReadSeconds: number;
+    course: { slug: string; title: string };
+  };
+}
+
+export async function getProgress(): Promise<LessonProgress[]> {
+  const data = await api<{ progress: LessonProgress[] }>(
+    "/api/v1/courses/me/progress",
+    {},
+    true
+  );
+  return data.progress;
+}
+
+/* ---------------- Testlar ---------------- */
+
+export interface QuizQuestion {
+  id: string;
+  text: string;
+  options: string[];
+}
+
+export interface LessonQuiz {
+  id: string;
+  title: string;
+  passScore: number;
+  questions: QuizQuestion[];
+}
+
+export interface QuizAttemptSummary {
+  score: number;
+  total: number;
+  passed: boolean;
+  createdAt: string;
+}
+
+export interface LessonQuizResponse {
+  ok: true;
+  quiz: LessonQuiz;
+  lastAttempt: QuizAttemptSummary | null;
+}
+
+export async function getLessonQuiz(lessonId: string): Promise<LessonQuizResponse> {
+  return api<LessonQuizResponse>(`/api/v1/quizzes/lesson/${lessonId}`, {}, true);
+}
+
+export async function submitQuiz(
+  quizId: string,
+  answers: number[]
+): Promise<{
+  attempt: { score: number; total: number; percent: number; passed: boolean };
+  expAwarded: number;
+  totalExp: number;
+}> {
+  return api(
+    `/api/v1/quizzes/${quizId}/submit`,
+    { method: "POST", body: JSON.stringify({ answers }) },
+    true
+  );
+}
+
+/* ---------------- Yangiliklar ---------------- */
+
+export interface NewsItem {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  category: string | null;
+  coverUrl: string | null;
+  publishedAt: string;
+}
+
+export interface NewsDetail extends NewsItem {
+  body: string;
+}
+
+export async function getNews(): Promise<NewsItem[]> {
+  const data = await api<{ news: NewsItem[] }>("/api/v1/news");
+  return data.news;
+}
+
+export async function getNewsItem(slug: string): Promise<NewsDetail> {
+  const data = await api<{ news: NewsDetail }>(`/api/v1/news/${slug}`);
+  return data.news;
+}
+
+/* ---------------- Do'kon ---------------- */
+
+export interface Product {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  category: string | null;
+  price: number;
+  imageUrl: string | null;
+  stock: number;
+}
+
+export interface OrderItem {
+  id: string;
+  quantity: number;
+  total: number;
+  fullName: string;
+  phone: string;
+  address: string | null;
+  status: "NEW" | "CONFIRMED" | "DELIVERED" | "CANCELLED";
+  createdAt: string;
+  product: { slug: string; name: string; price: number };
+}
+
+export async function getProducts(): Promise<Product[]> {
+  const data = await api<{ products: Product[] }>("/api/v1/shop/products");
+  return data.products;
+}
+
+export async function createOrder(input: {
+  productId: string;
+  quantity: number;
+  fullName: string;
+  phone: string;
+  address?: string;
+}): Promise<OrderItem> {
+  const data = await api<{ order: OrderItem }>(
+    "/api/v1/shop/orders",
+    { method: "POST", body: JSON.stringify(input) },
+    true
+  );
+  return data.order;
+}
+
+export async function getMyOrders(): Promise<OrderItem[]> {
+  const data = await api<{ orders: OrderItem[] }>("/api/v1/shop/orders/me", {}, true);
+  return data.orders;
+}
+
+/* ---------------- Sertifikat va reyting ---------------- */
+
+export interface CertificateItem {
+  id: string;
+  code: string;
+  issuedAt: string;
+  course: { slug: string; title: string; description: string | null };
+}
+
+export async function getMyCertificates(): Promise<CertificateItem[]> {
+  const data = await api<{ certificates: CertificateItem[] }>(
+    "/api/v1/certificates/me",
+    {},
+    true
+  );
+  return data.certificates;
+}
+
+export interface RatingUser {
+  position: number;
+  id: string;
+  fullName: string;
+  exp: number;
+  level: number;
+}
+
+export async function getRating(limit = 20): Promise<RatingUser[]> {
+  const data = await api<{ users: RatingUser[] }>(`/api/v1/rating?limit=${limit}`);
+  return data.users;
 }

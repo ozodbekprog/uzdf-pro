@@ -1,141 +1,260 @@
 import React, { useEffect, useState } from "react";
+import { RefreshControl, StyleSheet, View } from "react-native";
 import {
-  Button,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
-import {
-  DEFAULT_API_URL,
   checkZone,
-  getApiUrl,
   getZones,
-  setApiUrl,
   type Zone,
   type ZoneCheckResult,
+  type ZoneType,
 } from "../api";
-import { Card, ErrorText, H1, H2, Loader, Muted, colors, zoneColor } from "../components/ui";
+import {
+  Badge,
+  Body,
+  Button,
+  Card,
+  EmptyState,
+  ErrorText,
+  Field,
+  H1,
+  H2,
+  H3,
+  Input,
+  Loader,
+  Muted,
+  Row,
+  Screen,
+  colors,
+  zoneColor,
+} from "../components/ui";
+
+/** Natija holatiga mos matn. */
+const STATUS_LABEL: Record<ZoneCheckResult["status"], string> = {
+  CLEAR: "Erkin zona — uchish mumkin",
+  RED: "Taqiqlangan zona — uchish mumkin emas",
+  YELLOW: "Cheklangan zona — ehtiyot bo'ling",
+  GREEN: "Erkin zona",
+};
+
+/** Natija bannerining fon rangi. */
+const STATUS_BG: Record<ZoneCheckResult["status"], string> = {
+  CLEAR: "rgba(52,211,153,0.14)",
+  RED: "rgba(248,113,113,0.14)",
+  YELLOW: "rgba(251,191,36,0.14)",
+  GREEN: "rgba(52,211,153,0.14)",
+};
+
+/** Zona turini Badge ohangiga moslashtiradi (rang zoneColor bilan bir xil). */
+function zoneTone(type: ZoneType): "danger" | "warning" | "primary" {
+  if (type === "RED") return "danger";
+  if (type === "YELLOW") return "warning";
+  return "primary";
+}
 
 export default function ZonesScreen() {
   const [zones, setZones] = useState<Zone[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [listError, setListError] = useState<string | null>(null);
 
-  const [apiUrl, setApiUrlInput] = useState(DEFAULT_API_URL);
-  const [lat, setLat] = useState("41.2579");
-  const [lng, setLng] = useState("69.2812");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [check, setCheck] = useState<ZoneCheckResult | null>(null);
   const [checking, setChecking] = useState(false);
+  const [checkError, setCheckError] = useState<string | null>(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setApiUrlInput(await getApiUrl());
-        setZones(await getZones());
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Xatolik");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  async function saveUrl() {
-    try {
-      await setApiUrl(apiUrl.trim());
+  async function load(isRefresh = false) {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
       setLoading(true);
-      setError(null);
+    }
+    try {
+      setListError(null);
       setZones(await getZones());
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Xatolik");
+      setListError(e instanceof Error ? e.message : "Xatolik");
     } finally {
-      setLoading(false);
+      if (isRefresh) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
     }
   }
 
+  useEffect(() => {
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function onCheck() {
+    const latNum = Number(lat.trim().replace(",", "."));
+    const lngNum = Number(lng.trim().replace(",", "."));
+
+    if (!Number.isFinite(latNum) || !Number.isFinite(lngNum)) {
+      setCheck(null);
+      setCheckError("Iltimos, to'g'ri kenglik va uzunlik kiriting.");
+      return;
+    }
+
     setChecking(true);
-    setError(null);
+    setCheckError(null);
     try {
-      const res = await checkZone(parseFloat(lat), parseFloat(lng));
-      setCheck(res);
+      setCheck(await checkZone(latNum, lngNum));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Xatolik");
+      setCheck(null);
+      setCheckError(e instanceof Error ? e.message : "Xatolik");
     } finally {
       setChecking(false);
     }
   }
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return <Loader label="Zonalar yuklanmoqda..." />;
+  }
 
   return (
-    <ScrollView style={styles.wrap} contentContainerStyle={styles.content}>
-      <H1>UZDF Pro</H1>
-      <Muted>BPLA uchuvchilari platformasi — geozonalar, akademiya, kabinet.</Muted>
+    <Screen
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => load(true)}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
+      <H1>Uchish zonalari</H1>
+      <Muted>RED — taqiqlangan, YELLOW — cheklangan, GREEN — erkin.</Muted>
 
       <Card>
-        <H2>API manzili</H2>
-        <Muted>Telefon va kompyuter bitta Wi-Fi da bo'lsin.</Muted>
-        <TextInput style={styles.input} value={apiUrl} onChangeText={setApiUrlInput} autoCapitalize="none" />
-        <Button title="Saqlash va qayta ulash" onPress={saveUrl} color={colors.primary} />
+        <H2>Koordinata tekshiruvi</H2>
+        <Muted>Kenglik va uzunlikni kiriting — nuqta qaysi zonaga tushishini aniqlaymiz.</Muted>
+
+        <Row style={styles.inputs}>
+          <View style={styles.half}>
+            <Field label="Kenglik (lat)">
+              <Input
+                value={lat}
+                onChangeText={setLat}
+                keyboardType="numbers-and-punctuation"
+                placeholder="41.2579"
+                autoCapitalize="none"
+              />
+            </Field>
+          </View>
+          <View style={styles.half}>
+            <Field label="Uzunlik (lng)">
+              <Input
+                value={lng}
+                onChangeText={setLng}
+                keyboardType="numbers-and-punctuation"
+                placeholder="69.2812"
+                autoCapitalize="none"
+              />
+            </Field>
+          </View>
+        </Row>
+
+        <Button title="Tekshirish" onPress={onCheck} loading={checking} />
+
+        <ErrorText message={checkError} />
+
+        {check ? (
+          <View
+            style={[
+              styles.banner,
+              {
+                borderColor: zoneColor(check.status),
+                backgroundColor: STATUS_BG[check.status],
+              },
+            ]}
+          >
+            <Body style={[styles.bannerTitle, { color: zoneColor(check.status) }]}>
+              {check.status}
+            </Body>
+            <Muted>{STATUS_LABEL[check.status]}</Muted>
+
+            {check.zones.length > 0 ? (
+              <View style={styles.resultZones}>
+                {check.zones.map((z) => (
+                  <Row key={z.id} style={styles.resultZoneRow}>
+                    <View style={[styles.dot, { backgroundColor: zoneColor(z.type) }]} />
+                    <Body style={styles.grow}>{z.name}</Body>
+                    <Badge label={z.type} tone={zoneTone(z.type)} />
+                  </Row>
+                ))}
+              </View>
+            ) : (
+              <Muted>Nuqta hech qaysi zonaga tushmaydi.</Muted>
+            )}
+          </View>
+        ) : null}
       </Card>
 
-      <Card>
-        <H2>Nuqtani tekshirish</H2>
-        <View style={styles.row}>
-          <TextInput style={[styles.input, styles.half]} value={lat} onChangeText={setLat} keyboardType="decimal-pad" placeholder="lat" />
-          <TextInput style={[styles.input, styles.half]} value={lng} onChangeText={setLng} keyboardType="decimal-pad" placeholder="lng" />
-        </View>
-        <Button title={checking ? "Tekshirilmoqda..." : "Tekshirish"} onPress={onCheck} disabled={checking} color={colors.primary} />
-        {check && (
-          <View style={styles.result}>
-            <Text style={[styles.status, { color: zoneColor(check.status) }]}>{check.status}</Text>
-            {check.zones.map((z) => (
-              <Text key={z.id} style={styles.zoneLine}>
-                • {z.name} ({z.type})
-              </Text>
-            ))}
-            {check.zones.length === 0 && <Muted>Ochiq hudud — taqiq yo'q.</Muted>}
-          </View>
-        )}
-      </Card>
+      <H2>Zonalar ro'yxati ({zones.length})</H2>
 
-      <ErrorText message={error} />
+      <ErrorText message={listError} />
 
-      <H2>Geozonalar ({zones.length})</H2>
-      {zones.map((z) => (
-        <Card key={z.id}>
-          <View style={styles.titleRow}>
-            <View style={[styles.dot, { backgroundColor: zoneColor(z.type) }]} />
-            <Text style={styles.zoneName}>{z.name}</Text>
-          </View>
-          {z.description ? <Muted>{z.description}</Muted> : null}
-        </Card>
-      ))}
-    </ScrollView>
+      {zones.length === 0 ? (
+        listError ? null : (
+          <EmptyState
+            title="Zonalar topilmadi"
+            description="Hozircha hech qanday uchish zonasi kiritilmagan."
+          />
+        )
+      ) : (
+        zones.map((z) => (
+          <Card
+            key={z.id}
+            style={[styles.zoneCard, { borderLeftColor: zoneColor(z.type) }]}
+          >
+            <Row style={styles.zoneHeader}>
+              <View style={styles.grow}>
+                <H3>{z.name}</H3>
+              </View>
+              <Badge label={z.type} tone={zoneTone(z.type)} />
+            </Row>
+
+            {z.description ? <Muted>{z.description}</Muted> : null}
+
+            <Row style={styles.meta}>
+              <View
+                style={[
+                  styles.dot,
+                  { backgroundColor: z.active ? colors.primary : colors.dim },
+                ]}
+              />
+              <Muted>{z.active ? "Faol" : "Nofaol"}</Muted>
+            </Row>
+          </Card>
+        ))
+      )}
+    </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: colors.bg },
-  content: { padding: 16, paddingBottom: 40 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#cbd5e1",
-    borderRadius: 8,
-    padding: 10,
-    marginVertical: 8,
-    backgroundColor: "#fff",
-    color: colors.text,
-  },
-  row: { flexDirection: "row", gap: 8 },
+  inputs: { gap: 12, alignItems: "flex-start", marginTop: 8 },
   half: { flex: 1 },
-  result: { marginTop: 12 },
-  status: { fontSize: 22, fontWeight: "800", marginBottom: 4 },
-  titleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  dot: { width: 12, height: 12, borderRadius: 6 },
-  zoneName: { fontSize: 16, fontWeight: "600", color: colors.text, flex: 1 },
-  zoneLine: { color: colors.text, marginTop: 2 },
+
+  banner: {
+    marginTop: 14,
+    borderWidth: 2,
+    borderRadius: 14,
+    padding: 14,
+    gap: 6,
+  },
+  bannerTitle: { fontSize: 20, fontWeight: "800", letterSpacing: 0.5 },
+
+  resultZones: { marginTop: 6, gap: 8 },
+  resultZoneRow: { gap: 8 },
+
+  grow: { flex: 1 },
+
+  dot: { width: 10, height: 10, borderRadius: 5 },
+
+  zoneCard: { borderLeftWidth: 4, paddingLeft: 14 },
+  zoneHeader: { justifyContent: "space-between", gap: 8, marginBottom: 6 },
+  meta: { gap: 6, marginTop: 8 },
 });
