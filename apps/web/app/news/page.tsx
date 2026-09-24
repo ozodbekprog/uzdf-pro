@@ -44,7 +44,7 @@ function formatDate(value: string): string {
 function FeaturedNews({ item }: { item: NewsItem }) {
   return (
     <Link href={`/news/${item.slug}`} className="group block rise rise-2">
-      <article className="glass gradient-border card-hover relative h-[22rem] w-full overflow-hidden rounded-[2rem]">
+      <article className="glass gradient-border card-hover relative on-dark h-[22rem] w-full overflow-hidden rounded-[2rem]">
         {item.coverUrl ? (
           <Image
             src={item.coverUrl}

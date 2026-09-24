@@ -254,7 +254,7 @@ export default function ShopPage() {
                 mesh
                 className={`group rise rise-${(index % 6) + 1} flex h-full flex-col overflow-hidden`}
               >
-                <div className="relative h-44 w-full overflow-hidden bg-white/[0.03]">
+                <div className="relative on-dark h-44 w-full overflow-hidden bg-white/[0.03]">
                   {product.imageUrl ? (
                     <Image
                       src={product.imageUrl}

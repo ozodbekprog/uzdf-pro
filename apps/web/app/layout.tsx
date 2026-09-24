@@ -30,9 +30,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="uz"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-[#050a17] text-[#eaf1ff]">
+      <body className="min-h-full flex flex-col">
+        <script
+          // Mavzuni birinchi bo'yashdan oldin qo'llaymiz (miltillash bo'lmasligi uchun)
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var m=localStorage.getItem('dronchi-theme');if(m==='light'){document.documentElement.classList.add('light')}}catch(e){}",
+          }}
+        />
         <div className="aurora" aria-hidden="true" />
         <div className="grid-overlay" aria-hidden="true" />
         <div className="noise" aria-hidden="true" />

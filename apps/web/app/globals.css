@@ -1,18 +1,64 @@
 @import "tailwindcss";
 
+/* Oq mavzu uchun maxsus variant: `light:hidden`, `light:block` ... */
+@custom-variant light (&:where(html.light *));
+
+/* ------------------------------- Rang tokenlari ------------------------------- */
+/* Dark — standart. `html.light` bilan oq mavzuga o'tadi. */
+
 :root {
-  --background: #050a17;
-  --foreground: #eaf1ff;
-  --emerald: 52 211 153;
-  --cyan: 34 211 238;
+  --bg: #050a17;
+  --bg-soft: #0a1020;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-strong: rgba(255, 255, 255, 0.09);
+  --line: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --text: #eaf1ff;
+  --heading: #ffffff;
+  --muted: #8b9ab5;
+  --dim: #5c6a85;
+  --emerald: #34d399;
+  --cyan: #22d3ee;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --aurora-1: rgba(52, 211, 153, 0.5);
+  --aurora-2: rgba(34, 211, 238, 0.42);
+}
+
+html.light {
+  --bg: #f5f8fc;
+  --bg-soft: #ffffff;
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-strong: #ffffff;
+  --line: rgba(15, 23, 42, 0.1);
+  --line-strong: rgba(15, 23, 42, 0.18);
+  --text: #16233b;
+  --heading: #0a1220;
+  --muted: #5b6b83;
+  --dim: #8393a8;
+  --emerald: #059669;
+  --cyan: #0891b2;
+  --shadow: rgba(15, 23, 42, 0.12);
+  --aurora-1: rgba(16, 185, 129, 0.28);
+  --aurora-2: rgba(6, 182, 212, 0.24);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-sora);
+
+  --color-bg: var(--bg);
+  --color-bgsoft: var(--bg-soft);
+  --color-surface: var(--surface);
+  --color-surfacestrong: var(--surface-strong);
+  --color-line: var(--line);
+  --color-linestrong: var(--line-strong);
+  --color-ink: var(--text);
+  --color-heading: var(--heading);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
 }
 
 html {
@@ -20,18 +66,22 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
 }
+html.light {
+  color-scheme: light;
+}
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
   max-width: 100vw;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 ::selection {
-  background: rgba(52, 211, 153, 0.35);
-  color: #fff;
+  background: color-mix(in srgb, var(--emerald) 35%, transparent);
+  color: var(--heading);
 }
 
 ::-webkit-scrollbar {
@@ -42,11 +92,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, var(--text) 15%, transparent);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(52, 211, 153, 0.4);
+  background: color-mix(in srgb, var(--emerald) 45%, transparent);
 }
 
 /* ------------------------------- Orqa fonlar ------------------------------- */
@@ -73,14 +123,14 @@ body {
 .aurora::before {
   top: -16rem;
   left: -10rem;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.5), transparent 65%);
+  background: radial-gradient(circle, var(--aurora-1), transparent 65%);
   animation: drift 22s ease-in-out infinite alternate;
 }
 
 .aurora::after {
   top: 8rem;
   right: -14rem;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.42), transparent 65%);
+  background: radial-gradient(circle, var(--aurora-2), transparent 65%);
   animation: drift 26s ease-in-out infinite alternate-reverse;
 }
 
@@ -90,8 +140,8 @@ body {
   z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--text) 6%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--text) 6%, transparent) 1px, transparent 1px);
   background-size: 46px 46px;
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
@@ -105,25 +155,36 @@ body {
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+html.light .noise {
+  opacity: 0.02;
+}
 
 /* --------------------------------- Yuzalar --------------------------------- */
 
 .glass {
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--surface-strong) 78%, transparent),
+    var(--surface)
+  );
+  border: 1px solid var(--line);
   backdrop-filter: blur(14px);
 }
 
 .glass-strong {
-  background: linear-gradient(150deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(
+    150deg,
+    color-mix(in srgb, var(--surface-strong) 95%, transparent),
+    var(--surface)
+  );
+  border: 1px solid var(--line-strong);
   backdrop-filter: blur(20px);
 }
 
 .ring-glow {
   box-shadow:
-    0 0 0 1px rgba(52, 211, 153, 0.22),
-    0 22px 60px -28px rgba(52, 211, 153, 0.55);
+    0 0 0 1px color-mix(in srgb, var(--emerald) 25%, transparent),
+    0 22px 60px -28px color-mix(in srgb, var(--emerald) 60%, transparent);
 }
 
 .card-hover {
@@ -134,8 +195,8 @@ body {
 }
 .card-hover:hover {
   transform: translateY(-6px);
-  border-color: rgba(52, 211, 153, 0.4);
-  box-shadow: 0 30px 70px -40px rgba(52, 211, 153, 0.7);
+  border-color: color-mix(in srgb, var(--emerald) 45%, transparent);
+  box-shadow: 0 30px 70px -40px color-mix(in srgb, var(--emerald) 70%, transparent);
 }
 
 .mesh-card {
@@ -147,12 +208,21 @@ body {
   position: absolute;
   inset: -40% -20% auto -20%;
   height: 70%;
-  background: radial-gradient(60% 100% at 50% 0%, rgba(52, 211, 153, 0.22), transparent 70%);
+  background: radial-gradient(
+    60% 100% at 50% 0%,
+    color-mix(in srgb, var(--emerald) 22%, transparent),
+    transparent 70%
+  );
   pointer-events: none;
 }
 
 .gradient-text {
-  background: linear-gradient(100deg, #6ee7b7, #34d399 35%, #22d3ee 75%);
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--emerald) 70%, var(--heading)),
+    var(--emerald) 35%,
+    var(--cyan) 75%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -167,7 +237,12 @@ body {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(130deg, rgba(52, 211, 153, 0.6), rgba(34, 211, 238, 0.15), transparent 70%);
+  background: linear-gradient(
+    130deg,
+    color-mix(in srgb, var(--emerald) 60%, transparent),
+    color-mix(in srgb, var(--cyan) 18%, transparent),
+    transparent 70%
+  );
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -177,6 +252,23 @@ body {
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
+}
+
+/* Mavzu tugmasi */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.45rem 0.6rem;
+  color: var(--muted);
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.theme-toggle:hover {
+  color: var(--heading);
+  border-color: color-mix(in srgb, var(--emerald) 45%, transparent);
 }
 
 /* -------------------------------- Animatsiya -------------------------------- */
@@ -232,14 +324,19 @@ body {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--surface);
 }
 .skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--text) 9%, transparent),
+    transparent
+  );
   animation: shimmer 1.5s infinite;
 }
 
@@ -280,7 +377,13 @@ body {
   to { background-position: -200% center; }
 }
 .shine-text {
-  background: linear-gradient(90deg, #eaf1ff 20%, #6ee7b7 45%, #22d3ee 55%, #eaf1ff 80%);
+  background: linear-gradient(
+    90deg,
+    var(--heading) 20%,
+    var(--emerald) 45%,
+    var(--cyan) 55%,
+    var(--heading) 80%
+  );
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -297,12 +400,12 @@ body {
 
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(to right, color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--text) 5%, transparent) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-/* Mobil qurilmalarda katta fon sharlari kichraytiriladi (unumdorlik va ko'rinish) */
+/* Mobil qurilmalarda katta fon sharlari kichraytiriladi */
 @media (max-width: 640px) {
   .aurora::before,
   .aurora::after {
@@ -321,20 +424,87 @@ body {
   }
 }
 
+/* ------------------------- Oq mavzu moslashtirish ------------------------- */
+/* Sahifalarda ranglar to'g'ridan-to'g'ri Tailwind klasslari bilan yozilgan.
+   Quyida ular `html.light` paytida token qiymatlariga o'girib yuboriladi —
+   shu sababli butun sayt bir zumda oq mavzuga o'tadi.
+   Istisno: rasm ustidagi (qorong'i gradientli) bloklar `.on-dark` bilan
+   himoyalanadi — ularda matn ikkala mavzuda ham oq qoladi. */
+
+html.light [class*="text-neutral-1"],
+html.light [class*="text-neutral-2"],
+html.light [class*="text-neutral-3"] {
+  color: var(--text) !important;
+}
+html.light [class*="text-neutral-4"],
+html.light [class*="text-neutral-5"] {
+  color: var(--muted) !important;
+}
+html.light .text-white {
+  color: var(--heading) !important;
+}
+html.light [class*="border-white/"] {
+  border-color: var(--line) !important;
+}
+html.light [class*="bg-white/"] {
+  background-color: var(--surface) !important;
+}
+html.light [class*="bg-neutral-950"],
+html.light [class*="bg-[#05"],
+html.light [class*="bg-[#07"],
+html.light [class*="bg-[#0a"],
+html.light [class*="bg-[#0d"],
+html.light [class*="bg-[#0b"] {
+  background-color: var(--bg) !important;
+}
+html.light [class*="text-emerald-400"] {
+  color: var(--emerald) !important;
+}
+html.light [class*="text-cyan-300"],
+html.light [class*="text-cyan-400"] {
+  color: var(--cyan) !important;
+}
+html.light [class*="text-sky-400"] {
+  color: #0284c7 !important;
+}
+html.light [class*="text-amber-400"] {
+  color: #b45309 !important;
+}
+html.light [class*="text-violet-400"] {
+  color: #7c3aed !important;
+}
+
+/* Rasm / qorong'i gradient ustidagi matnlar — har ikki mavzuda oq */
+html.light .on-dark,
+html.light .on-dark [class*="text-white"],
+html.light .on-dark [class*="text-neutral-1"],
+html.light .on-dark [class*="text-neutral-2"],
+html.light .on-dark [class*="text-neutral-3"],
+html.light .on-dark [class*="text-neutral-4"],
+html.light .on-dark [class*="text-neutral-5"] {
+  color: #ffffff !important;
+}
+html.light .on-dark [class*="border-white/"] {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+html.light .on-dark [class*="bg-white/"] {
+  background-color: rgba(255, 255, 255, 0.09) !important;
+}
+
 /* --------------------------------- Leaflet --------------------------------- */
 
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #0b0f14;
+  background: var(--bg-soft);
   border-radius: 0.75rem;
 }
 .leaflet-control-attribution {
-  background: rgba(6, 8, 12, 0.7) !important;
-  color: #9ca3af !important;
+  background: color-mix(in srgb, var(--bg) 70%, transparent) !important;
+  color: var(--muted) !important;
 }
 .leaflet-control-attribution a {
-  color: #38bdf8 !important;
+  color: var(--cyan) !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

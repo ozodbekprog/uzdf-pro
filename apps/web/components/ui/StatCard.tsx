@@ -11,19 +11,11 @@ interface StatCardProps {
 }
 
 const ACCENTS = {
-  sky: "text-sky-400",
-  emerald: "text-emerald-400",
-  amber: "text-amber-400",
-  violet: "text-violet-400",
-  red: "text-red-400",
-} as const;
-
-const GLOWS = {
-  sky: "from-sky-500/[0.14]",
-  emerald: "from-emerald-500/[0.16]",
-  amber: "from-amber-500/[0.14]",
-  violet: "from-violet-500/[0.14]",
-  red: "from-red-500/[0.14]",
+  sky: "text-sky-400 light:text-sky-600",
+  emerald: "text-emerald-400 light:text-emerald-600",
+  amber: "text-amber-400 light:text-amber-600",
+  violet: "text-violet-400 light:text-violet-600",
+  red: "text-red-400 light:text-red-600",
 } as const;
 
 export default function StatCard({
@@ -35,25 +27,16 @@ export default function StatCard({
   icon,
 }: StatCardProps) {
   return (
-    <div
-      className={cn(
-        "group relative overflow-hidden rounded-3xl border border-white/[0.09] p-5",
-        "bg-gradient-to-br from-white/[0.06] via-white/[0.025] to-transparent backdrop-blur-xl",
-        "card-hover",
-        className
-      )}
-    >
+    <div className={cn("glass card-hover relative overflow-hidden rounded-3xl p-5", className)}>
       <div
         aria-hidden="true"
         className={cn(
-          "pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-gradient-to-b to-transparent blur-2xl",
-          GLOWS[accent]
+          "pointer-events-none absolute -right-10 -top-14 h-32 w-32 rounded-full bg-gradient-to-b from-current to-transparent opacity-[0.14] blur-2xl",
+          ACCENTS[accent]
         )}
       />
       <div className="relative flex items-start justify-between gap-3">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-neutral-500">
-          {label}
-        </p>
+        <p className="text-[11px] font-semibold uppercase tracking-widest text-muted">{label}</p>
         {icon ? <span className={cn("shrink-0", ACCENTS[accent])}>{icon}</span> : null}
       </div>
       <p
@@ -64,7 +47,7 @@ export default function StatCard({
       >
         {value}
       </p>
-      {hint ? <p className="relative mt-1 text-xs text-neutral-500">{hint}</p> : null}
+      {hint ? <p className="relative mt-1 text-xs text-muted">{hint}</p> : null}
     </div>
   );
 }

@@ -129,7 +129,7 @@ export default function AcademyPage() {
                 hover
                 className={`rise rise-${(index % 3) + 1} group flex flex-col overflow-hidden`}
               >
-                <div className="relative h-44 w-full overflow-hidden">
+                <div className="relative on-dark h-44 w-full overflow-hidden">
                   <Image
                     src={course.coverUrl ?? "/images/course-fpv.png"}
                     alt={course.title}

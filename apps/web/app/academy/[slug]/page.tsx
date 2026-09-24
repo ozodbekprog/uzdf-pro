@@ -148,7 +148,7 @@ function CourseView({ slug }: { slug: string }) {
           <div className="flex flex-col gap-6">
             {/* ------------------------------ SARLAVHA ------------------------------ */}
             <section className="gradient-border rise rise-2 relative overflow-hidden rounded-3xl">
-              <div className="relative h-56 w-full sm:h-72">
+              <div className="relative on-dark h-56 w-full sm:h-72">
                 <Image
                   src={course.coverUrl ?? "/images/course-fpv.png"}
                   alt={course.title}

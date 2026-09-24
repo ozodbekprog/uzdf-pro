@@ -7,7 +7,7 @@ import type {
 import { cn } from "@/lib/cn";
 
 const FIELD =
-  "w-full rounded-xl border border-white/10 bg-neutral-950/60 px-3.5 py-2.5 text-sm text-neutral-100 placeholder:text-neutral-500 outline-none transition focus:border-sky-400/60 focus:ring-2 focus:ring-sky-500/20";
+  "w-full rounded-xl border border-line bg-bgsoft px-3.5 py-2.5 text-sm text-ink placeholder:text-dim outline-none transition focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-500/20";
 
 interface FieldProps {
   label: string;
@@ -19,9 +19,9 @@ interface FieldProps {
 export function Field({ label, hint, children, className }: FieldProps) {
   return (
     <label className={cn("flex flex-col gap-1.5 text-sm", className)}>
-      <span className="font-medium text-neutral-300">{label}</span>
+      <span className="font-medium text-ink">{label}</span>
       {children}
-      {hint ? <span className="text-xs text-neutral-500">{hint}</span> : null}
+      {hint ? <span className="text-xs text-dim">{hint}</span> : null}
     </label>
   );
 }

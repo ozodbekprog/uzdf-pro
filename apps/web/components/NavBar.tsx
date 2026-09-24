@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { buttonClasses } from "@/components/ui/Button";
+import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/cn";
 import { logout } from "@/lib/api";
 import { useIsAuthed } from "@/lib/auth-store";
@@ -77,6 +78,7 @@ export default function NavBar() {
         </nav>
 
         <div className="hidden items-center gap-2 md:flex">
+          <ThemeToggle />
           {authed ? (
             <button
               onClick={handleLogout}
@@ -158,7 +160,8 @@ export default function NavBar() {
               })}
             </nav>
 
-            <div className="mt-3 flex gap-2 border-t border-white/[0.08] pt-3">
+            <div className="mt-3 flex gap-2 border-t border-line pt-3">
+              <ThemeToggle className="shrink-0" />
               {authed ? (
                 <button
                   onClick={handleLogout}

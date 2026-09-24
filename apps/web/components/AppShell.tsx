@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { buttonClasses } from "@/components/ui/Button";
+import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/cn";
 import { getMe, getTokens, logout, type PublicUser } from "@/lib/api";
 
@@ -266,16 +267,19 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <p className="text-xs text-neutral-500">Yuklanmoqda...</p>
           )}
 
-          <button
-            onClick={handleLogout}
-            className={buttonClasses({
-              variant: "secondary",
-              size: "sm",
-              className: "mt-3 w-full",
-            })}
-          >
-            Chiqish
-          </button>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              onClick={handleLogout}
+              className={buttonClasses({
+                variant: "secondary",
+                size: "sm",
+                className: "flex-1",
+              })}
+            >
+              Chiqish
+            </button>
+            <ThemeToggle className="shrink-0" />
+          </div>
         </div>
       </div>
     </div>
@@ -294,21 +298,24 @@ export default function AppShell({ children }: { children: ReactNode }) {
             DRON<span className="gradient-text">CHI</span>
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          aria-label="Menyu"
-          aria-expanded={open}
-          className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-neutral-300 transition hover:bg-white/5"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            {open ? (
-              <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            ) : (
-              <path d="M2 4.5h12M2 8h12M2 11.5h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            )}
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-label="Menyu"
+            aria-expanded={open}
+            className="grid h-10 w-10 place-items-center rounded-full border border-line text-muted transition hover:bg-surface"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              {open ? (
+                <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              ) : (
+                <path d="M2 4.5h12M2 8h12M2 11.5h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
+        </div>
       </header>
 
       {open ? (
@@ -357,10 +364,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
               />
             </label>
 
+            <ThemeToggle />
+
             <button
               type="button"
               aria-label="Bildirishnomalar"
-              className="glass relative grid h-10 w-10 place-items-center rounded-xl text-neutral-400 transition hover:text-white"
+              className="glass relative grid h-10 w-10 place-items-center rounded-xl text-muted transition hover:text-heading"
             >
               <svg
                 width="17"

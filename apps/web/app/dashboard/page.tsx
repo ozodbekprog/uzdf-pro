@@ -574,7 +574,7 @@ export default function DashboardPage() {
             <Card border glow className="overflow-hidden p-0">
               {activeCourse ? (
                 <div className="grid md:grid-cols-[0.85fr_1.15fr]">
-                  <div className="relative min-h-52 md:min-h-full">
+                  <div className="relative on-dark min-h-52 md:min-h-full">
                     <Image
                       src={activeCourse.coverUrl ?? "/images/course-fpv.png"}
                       alt={activeCourse.title}
@@ -686,7 +686,7 @@ export default function DashboardPage() {
                   return (
                     <div key={course.id} className={cn("rise", `rise-${index + 1}`)}>
                       <Card hover className="group flex h-full flex-col overflow-hidden">
-                        <div className="relative h-40 w-full">
+                        <div className="relative on-dark h-40 w-full">
                           <Image
                             src={course.coverUrl ?? "/images/course-fpv.png"}
                             alt={course.title}

@@ -283,7 +283,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative on-dark">
             <div className="gradient-border floaty relative h-[24rem] w-full overflow-hidden rounded-[2rem] sm:h-[28rem]">
               <Image
                 src="/images/course-fpv.png"
@@ -363,7 +363,7 @@ export default function Home() {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3 lg:grid-rows-2">
-          <div className="glass card-hover relative overflow-hidden rounded-3xl lg:col-span-2 lg:row-span-2">
+          <div className="glass card-hover relative on-dark overflow-hidden rounded-3xl lg:col-span-2 lg:row-span-2">
             <div className="relative h-72 w-full sm:h-96">
               <Image
                 src="/images/news-polygons.png"
@@ -518,7 +518,7 @@ export default function Home() {
           {courses.map((course, index) => (
             <Tilt key={course.title}>
               <div className={`glass card-hover rise rise-${index + 1} flex h-full flex-col overflow-hidden rounded-3xl`}>
-                <div className="relative h-44 w-full">
+                <div className="relative on-dark h-44 w-full">
                   <Image
                     src={course.image}
                     alt={course.title}

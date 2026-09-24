@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import Alert from "@/components/ui/Alert";
 import { buttonClasses } from "@/components/ui/Button";
+import ThemeToggle from "@/components/ThemeToggle";
 import { cn } from "@/lib/cn";
 import { getMe, logout, type PublicUser } from "@/lib/api";
 import { useIsAuthed } from "@/lib/auth-store";
@@ -344,21 +345,24 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             </Link>
           </div>
 
-          <button
-            type="button"
-            onClick={async () => {
-              await logout();
-              router.push("/login");
-            }}
-            className={buttonClasses({
-              variant: "secondary",
-              size: "sm",
-              className: "mt-3 w-full",
-            })}
-          >
-            <Icon name="logout" className="h-3.5 w-3.5" />
-            Chiqish
-          </button>
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                await logout();
+                router.push("/login");
+              }}
+              className={buttonClasses({
+                variant: "secondary",
+                size: "sm",
+                className: "flex-1",
+              })}
+            >
+              <Icon name="logout" className="h-3.5 w-3.5" />
+              Chiqish
+            </button>
+            <ThemeToggle className="shrink-0" />
+          </div>
         </div>
       </div>
     </div>
@@ -391,20 +395,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <span className="ml-1 text-amber-300/90">Admin</span>
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          aria-label="Menyu"
-          className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-neutral-300 transition hover:border-amber-400/40 hover:text-white"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            {open ? (
-              <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            ) : (
-              <path d="M2 4.5h12M2 8h12M2 11.5h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            )}
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            aria-label="Menyu"
+            className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-surface text-muted transition hover:border-amber-400/40 hover:text-heading"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              {open ? (
+                <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              ) : (
+                <path d="M2 4.5h12M2 8h12M2 11.5h12" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
+        </div>
       </header>
 
       {open ? (

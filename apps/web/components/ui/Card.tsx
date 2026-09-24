@@ -23,9 +23,7 @@ export default function Card({
   return (
     <div
       className={cn(
-        "relative rounded-3xl border border-white/[0.09]",
-        "bg-gradient-to-br from-white/[0.06] via-white/[0.025] to-transparent",
-        "backdrop-blur-xl",
+        "glass relative rounded-3xl",
         hover && "card-hover",
         glow && "ring-glow",
         border && "gradient-border",

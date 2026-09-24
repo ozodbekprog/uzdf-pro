@@ -4,12 +4,15 @@ import { cn } from "@/lib/cn";
 export type BadgeTone = "sky" | "emerald" | "amber" | "red" | "violet" | "neutral";
 
 const TONES: Record<BadgeTone, string> = {
-  sky: "border-sky-400/35 bg-sky-400/10 text-sky-300",
-  emerald: "border-emerald-400/35 bg-emerald-400/10 text-emerald-300",
-  amber: "border-amber-400/35 bg-amber-400/10 text-amber-300",
-  red: "border-red-400/35 bg-red-400/10 text-red-300",
-  violet: "border-violet-400/35 bg-violet-400/10 text-violet-300",
-  neutral: "border-white/12 bg-white/[0.05] text-neutral-300",
+  sky: "border-sky-500/40 bg-sky-500/10 text-sky-300 light:text-sky-700 light:border-sky-600/30",
+  emerald:
+    "border-emerald-500/40 bg-emerald-500/10 text-emerald-300 light:text-emerald-700 light:border-emerald-600/30",
+  amber:
+    "border-amber-500/40 bg-amber-500/10 text-amber-300 light:text-amber-700 light:border-amber-600/30",
+  red: "border-red-500/40 bg-red-500/10 text-red-300 light:text-red-700 light:border-red-600/30",
+  violet:
+    "border-violet-500/40 bg-violet-500/10 text-violet-300 light:text-violet-700 light:border-violet-600/30",
+  neutral: "border-line bg-surface text-muted",
 };
 
 interface BadgeProps {

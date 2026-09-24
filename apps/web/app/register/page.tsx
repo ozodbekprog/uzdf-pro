@@ -40,7 +40,7 @@ const highlights = [
 
 function AuthAside() {
   return (
-    <aside className="relative hidden overflow-hidden lg:flex lg:min-h-[40rem] lg:flex-col">
+    <aside className="relative on-dark hidden overflow-hidden lg:flex lg:min-h-[40rem] lg:flex-col">
       <Image
         src="/images/news-simulator.png"
         alt="Milliy simulyator"

@@ -495,7 +495,7 @@ export default function AdminCoursesPage() {
                   isActive && "ring-1 ring-sky-400/50"
                 )}
               >
-                <div className="relative h-36 w-full">
+                <div className="relative on-dark h-36 w-full">
                   {course.coverUrl ? (
                     <Image
                       src={course.coverUrl}
