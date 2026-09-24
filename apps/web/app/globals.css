@@ -18,6 +18,7 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -25,6 +26,7 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  max-width: 100vw;
 }
 
 ::selection {
@@ -259,6 +261,8 @@ body {
   animation: marquee 26s linear infinite;
 }
 .marquee-mask {
+  overflow: hidden;
+  width: 100%;
   mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
@@ -296,6 +300,25 @@ body {
     linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
+}
+
+/* Mobil qurilmalarda katta fon sharlari kichraytiriladi (unumdorlik va ko'rinish) */
+@media (max-width: 640px) {
+  .aurora::before,
+  .aurora::after {
+    width: 26rem;
+    height: 26rem;
+    filter: blur(80px);
+    opacity: 0.4;
+  }
+  .aurora::before {
+    top: -10rem;
+    left: -8rem;
+  }
+  .aurora::after {
+    top: 6rem;
+    right: -10rem;
+  }
 }
 
 /* --------------------------------- Leaflet --------------------------------- */
