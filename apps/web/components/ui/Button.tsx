@@ -6,9 +6,9 @@ export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary:
-    "bg-gradient-to-r from-emerald-500 to-cyan-400 text-neutral-950 font-semibold shadow-lg shadow-emerald-500/25 hover:brightness-110 active:brightness-95",
+    "bg-gradient-to-r from-emerald-400 via-emerald-500 to-cyan-400 text-[#04121f] font-bold shadow-[0_18px_45px_-18px_rgba(52,211,153,0.75)] hover:shadow-[0_22px_55px_-16px_rgba(52,211,153,0.95)] hover:brightness-[1.06] active:brightness-95",
   secondary:
-    "border border-white/10 bg-white/5 text-neutral-100 hover:border-sky-400/50 hover:bg-white/10",
+    "border border-white/12 bg-white/[0.05] text-neutral-100 backdrop-blur-md hover:border-emerald-400/45 hover:bg-white/[0.09]",
   ghost: "text-neutral-300 hover:bg-white/5 hover:text-white",
   danger:
     "border border-red-500/40 bg-red-500/10 text-red-300 hover:bg-red-500/20 hover:text-red-200",

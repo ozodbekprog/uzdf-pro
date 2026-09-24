@@ -29,33 +29,47 @@ export default function NavBar() {
     router.push("/");
   }
 
+  function isActive(href: string) {
+    return href === "/" ? pathname === "/" : pathname.startsWith(href);
+  }
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/5 bg-neutral-950/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 text-sm font-bold text-neutral-950">
+    <header className="glass-strong sticky top-0 z-50">
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-cyan-400/20"
+      />
+
+      <div className="relative mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <Link href="/" className="group flex items-center gap-2.5">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 font-display text-sm font-extrabold text-[#04121f] shadow-[0_12px_32px_-14px_rgba(52,211,153,0.95)] transition group-hover:brightness-110">
             D
           </span>
-          <span className="text-base font-semibold tracking-tight text-white">
-            DRON<span className="text-emerald-400">CHI</span>
+          <span className="font-display text-base font-extrabold tracking-tight text-white">
+            DRON<span className="gradient-text">CHI</span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 md:flex">
+        <nav className="hidden items-center gap-1.5 md:flex">
           {LINKS.map((link) => {
-            const active =
-              link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+            const active = isActive(link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-sm transition",
+                  "relative inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm font-medium transition",
                   active
-                    ? "bg-white/10 text-white"
-                    : "text-neutral-400 hover:bg-white/5 hover:text-white"
+                    ? "glass text-emerald-300"
+                    : "text-neutral-400 hover:bg-white/[0.04] hover:text-white"
                 )}
               >
+                {active ? (
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-70 pulse-glow" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  </span>
+                ) : null}
                 {link.label}
               </Link>
             );
@@ -75,7 +89,10 @@ export default function NavBar() {
               <Link href="/login" className={buttonClasses({ variant: "ghost", size: "sm" })}>
                 Kirish
               </Link>
-              <Link href="/register" className={buttonClasses({ size: "sm" })}>
+              <Link
+                href="/register"
+                className={buttonClasses({ size: "sm", className: "ring-glow" })}
+              >
                 Ro&apos;yxatdan o&apos;tish
               </Link>
             </>
@@ -86,7 +103,8 @@ export default function NavBar() {
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-label="Menyuni ochish"
-          className="grid h-10 w-10 place-items-center rounded-lg border border-white/10 text-neutral-300 transition hover:bg-white/5 md:hidden"
+          aria-expanded={open}
+          className="glass grid h-10 w-10 place-items-center rounded-full text-neutral-200 transition hover:text-white md:hidden"
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
             {open ? (
@@ -108,44 +126,74 @@ export default function NavBar() {
         </button>
       </div>
 
-      {open ? (
-        <div className="border-t border-white/5 bg-neutral-950/95 px-4 py-3 md:hidden">
-          <nav className="flex flex-col gap-1">
-            {LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2.5 text-sm text-neutral-300 transition hover:bg-white/5 hover:text-white"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="mt-3 flex gap-2 border-t border-white/5 pt-3">
-            {authed ? (
-              <button
-                onClick={handleLogout}
-                className={buttonClasses({ variant: "secondary", size: "sm", className: "flex-1" })}
-              >
-                Chiqish
-              </button>
-            ) : (
-              <>
-                <Link
-                  href="/login"
-                  className={buttonClasses({ variant: "secondary", size: "sm", className: "flex-1" })}
+      <div
+        className={cn(
+          "relative grid overflow-hidden transition-[grid-template-rows] duration-300 ease-out md:hidden",
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        )}
+      >
+        <div className="min-h-0">
+          <div className="glass-strong mx-3 mb-3 rounded-2xl p-3">
+            <nav className="flex flex-col gap-1">
+              {LINKS.map((link) => {
+                const active = isActive(link.href);
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "relative flex items-center gap-2.5 rounded-xl px-3.5 py-2.5 text-sm font-medium transition",
+                      active
+                        ? "glass text-emerald-300"
+                        : "text-neutral-300 hover:bg-white/[0.05] hover:text-white"
+                    )}
+                  >
+                    {active ? (
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 pulse-glow" />
+                    ) : null}
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            <div className="mt-3 flex gap-2 border-t border-white/[0.08] pt-3">
+              {authed ? (
+                <button
+                  onClick={handleLogout}
+                  className={buttonClasses({
+                    variant: "secondary",
+                    size: "sm",
+                    className: "flex-1",
+                  })}
                 >
-                  Kirish
-                </Link>
-                <Link href="/register" className={buttonClasses({ size: "sm", className: "flex-1" })}>
-                  Ro&apos;yxatdan o&apos;tish
-                </Link>
-              </>
-            )}
+                  Chiqish
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={buttonClasses({
+                      variant: "secondary",
+                      size: "sm",
+                      className: "flex-1",
+                    })}
+                  >
+                    Kirish
+                  </Link>
+                  <Link
+                    href="/register"
+                    className={buttonClasses({ size: "sm", className: "flex-1" })}
+                  >
+                    Ro&apos;yxatdan o&apos;tish
+                  </Link>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      ) : null}
+      </div>
     </header>
   );
 }

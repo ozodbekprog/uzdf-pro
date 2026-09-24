@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,12 +11,10 @@ import {
 import { login, registerUser, verifyEmail } from "../api";
 import {
   Badge,
-  Body,
   Button,
   Card,
   ErrorText,
   Field,
-  H2,
   Input,
   Muted,
   colors,
@@ -119,32 +118,58 @@ export default function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) 
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
-        <View style={styles.header}>
-          <View style={styles.logo}>
-            <Text style={styles.logoText}>D</Text>
+        <View style={styles.brandBlock}>
+          <View style={styles.logoGlow} />
+          <View style={styles.logoRing}>
+            <View style={styles.logo}>
+              <Text style={styles.logoText}>D</Text>
+            </View>
           </View>
-          <Text style={styles.brand}>DRONCHI</Text>
-          <Muted>Dron ekotizimi — boshqaruv paneli</Muted>
+          <Text style={styles.brand}>
+            DRON<Text style={styles.brandAccent}>CHI</Text>
+          </Text>
+          <Muted style={styles.brandSub}>Dron ekotizimi — boshqaruv paneli</Muted>
         </View>
 
         <View style={styles.segment}>
-          <Button
-            title="Kirish"
-            variant={mode === "login" ? "primary" : "secondary"}
+          <Pressable
             onPress={() => switchMode("login")}
-            style={styles.segmentBtn}
-          />
-          <Button
-            title="Ro'yxatdan o'tish"
-            variant={mode === "register" ? "primary" : "secondary"}
+            style={({ pressed }) => [
+              styles.segmentItem,
+              mode === "login" ? styles.segmentItemActive : null,
+              pressed ? styles.pressed : null,
+            ]}
+          >
+            <Text
+              style={[styles.segmentText, mode === "login" ? styles.segmentTextActive : null]}
+            >
+              Kirish
+            </Text>
+          </Pressable>
+          <Pressable
             onPress={() => switchMode("register")}
-            style={styles.segmentBtn}
-          />
+            style={({ pressed }) => [
+              styles.segmentItem,
+              mode === "register" ? styles.segmentItemActive : null,
+              pressed ? styles.pressed : null,
+            ]}
+          >
+            <Text
+              style={[
+                styles.segmentText,
+                mode === "register" ? styles.segmentTextActive : null,
+              ]}
+            >
+              Ro'yxatdan o'tish
+            </Text>
+          </Pressable>
         </View>
 
         {mode === "login" && (
-          <Card>
-            <H2>Hisobingizga kiring</H2>
+          <Card style={styles.panel}>
+            <View style={styles.panelSheen} />
+            <Text style={styles.cardTitle}>Hisobingizga kiring</Text>
+            <Text style={styles.cardHint}>Email va parolingizni kiriting.</Text>
             <Field label="Email">
               <Input
                 value={email}
@@ -176,8 +201,10 @@ export default function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) 
         )}
 
         {mode === "register" && step === "form" && (
-          <Card>
-            <H2>Yangi hisob yaratish</H2>
+          <Card style={styles.panel}>
+            <View style={styles.panelSheen} />
+            <Text style={styles.cardTitle}>Yangi hisob yaratish</Text>
+            <Text style={styles.cardHint}>Ma'lumotlaringizni to'ldiring.</Text>
             <Field label="F.I.Sh">
               <Input
                 value={fullName}
@@ -225,9 +252,10 @@ export default function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) 
         )}
 
         {mode === "register" && step === "otp" && (
-          <Card>
-            <H2>Emailni tasdiqlash</H2>
-            <Body>Emailingizga 6 xonali kod yuborildi.</Body>
+          <Card style={styles.panel}>
+            <View style={styles.panelSheen} />
+            <Text style={styles.cardTitle}>Emailni tasdiqlash</Text>
+            <Text style={styles.cardHint}>Emailingizga 6 xonali kod yuborildi.</Text>
             {devOtp ? (
               <View style={styles.devRow}>
                 <Badge label="Test rejimi" tone="warning" />
@@ -260,16 +288,17 @@ export default function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) 
         )}
 
         {info ? (
-          <Card>
-            <Muted>{info}</Muted>
-          </Card>
+          <View style={styles.infoBox}>
+            <Text style={styles.infoText}>{info}</Text>
+          </View>
         ) : null}
 
         <ErrorText message={error} />
 
-        <Muted style={styles.note}>
-          Test akkauntlari: pilot@uzdf.pro / Dronchi-Pilot-2026!
-        </Muted>
+        <View style={styles.noteBox}>
+          <Text style={styles.noteTitle}>Test akkaunti</Text>
+          <Muted style={styles.noteText}>pilot@uzdf.pro / Dronchi-Pilot-2026!</Muted>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -278,22 +307,135 @@ export default function LoginScreen({ onLoggedIn }: { onLoggedIn: () => void }) 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
   content: { padding: 20, paddingBottom: 48, gap: 16 },
-  header: { alignItems: "center", gap: 8, marginTop: 24, marginBottom: 4 },
+
+  /* Brend */
+  brandBlock: { alignItems: "center", gap: 6, marginTop: 28, marginBottom: 6 },
+  logoGlow: {
+    position: "absolute",
+    top: -14,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "rgba(52,211,153,0.12)",
+  },
+  logoRing: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor: "rgba(52,211,153,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(52,211,153,0.08)",
+  },
   logo: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 62,
+    height: 62,
+    borderRadius: 31,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: colors.primary,
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
   },
   logoText: { fontSize: 30, fontWeight: "800", color: colors.bg },
-  brand: { fontSize: 28, fontWeight: "800", color: colors.primary, letterSpacing: 2 },
-  segment: { flexDirection: "row", gap: 8 },
-  segmentBtn: { flex: 1 },
+  brand: { fontSize: 28, fontWeight: "800", color: colors.text, letterSpacing: 2 },
+  brandAccent: { color: colors.primary },
+  brandSub: { textAlign: "center" },
+
+  /* Segment */
+  segment: {
+    flexDirection: "row",
+    gap: 6,
+    padding: 5,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  segmentItem: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  segmentItemActive: {
+    backgroundColor: "rgba(52,211,153,0.14)",
+    borderColor: "rgba(52,211,153,0.35)",
+  },
+  segmentText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
+  segmentTextActive: { color: colors.primary },
+  pressed: { opacity: 0.85 },
+
+  /* Forma kartasi */
+  panel: {
+    borderRadius: 18,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
+    padding: 18,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
+  },
+  panelSheen: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 80,
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  cardTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
+  cardHint: { color: colors.muted, fontSize: 12, marginTop: 4, marginBottom: 14 },
   submit: { marginTop: 8 },
-  devRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 4 },
-  otpInput: { letterSpacing: 8, textAlign: "center", fontSize: 20, fontWeight: "700" },
+  devRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
+  otpInput: {
+    letterSpacing: 8,
+    textAlign: "center",
+    fontSize: 20,
+    fontWeight: "700",
+  },
   backRow: { marginTop: 12, alignItems: "center" },
-  note: { textAlign: "center", marginTop: 8 },
+
+  /* Info va izoh */
+  infoBox: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(34,211,238,0.32)",
+    backgroundColor: "rgba(34,211,238,0.10)",
+    padding: 14,
+  },
+  infoText: { color: colors.accent, fontSize: 13, lineHeight: 19 },
+  noteBox: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    padding: 14,
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+  },
+  noteTitle: {
+    color: colors.muted,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.2,
+    textTransform: "uppercase",
+  },
+  noteText: { textAlign: "center" },
 });

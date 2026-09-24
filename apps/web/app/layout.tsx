@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Sora } from "next/font/google";
 import { Toaster } from "sonner";
 import Chrome from "@/components/Chrome";
 import "./globals.css";
@@ -14,6 +14,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const display = Sora({
+  variable: "--font-sora",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
 export const metadata: Metadata = {
   title: "DRONCHI — Dron texnologiyalariga olib boruvchi yagona platforma",
   description:
@@ -24,9 +30,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="uz"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-neutral-950 text-neutral-100">
+      <body className="min-h-full flex flex-col bg-[#050a17] text-[#eaf1ff]">
+        <div className="aurora" aria-hidden="true" />
+        <div className="grid-overlay" aria-hidden="true" />
+        <div className="noise" aria-hidden="true" />
         <Chrome>
           <div className="flex flex-1 flex-col">{children}</div>
         </Chrome>

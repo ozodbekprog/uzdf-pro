@@ -136,6 +136,15 @@ function levelOf(exp: number): number {
   return Math.floor(exp / 100) + 1;
 }
 
+function initialsOf(fullName: string): string {
+  return fullName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -156,6 +165,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   const level = user ? levelOf(user.exp) : 1;
   const inLevel = user ? user.exp % 100 : 0;
+  const initials = user ? initialsOf(user.fullName) : "D";
   const pageTitle =
     ROUTE_TITLES.find((item) => pathname.startsWith(item.match))?.title ?? "Kabinet";
 
@@ -166,13 +176,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
         className="pointer-events-none absolute -top-24 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-emerald-500/15 blur-3xl"
       />
 
-      <div className="relative flex items-center gap-2.5 px-6 pb-6 pt-7">
+      <div className="relative flex items-center gap-2.5 px-5 pb-5 pt-6">
         <Link href="/" className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-sm font-bold text-neutral-950 shadow-lg shadow-emerald-500/25">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 font-display text-sm font-extrabold text-[#04121f] shadow-[0_12px_32px_-14px_rgba(52,211,153,0.95)]">
             D
           </span>
-          <span className="text-base font-semibold tracking-tight text-white">
-            DRON<span className="text-emerald-400">CHI</span>
+          <span className="font-display text-base font-extrabold tracking-tight text-white">
+            DRON<span className="gradient-text">CHI</span>
           </span>
         </Link>
       </div>
@@ -180,7 +190,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <nav className="relative flex flex-1 flex-col gap-5 overflow-y-auto px-3 pb-4">
         {NAV_GROUPS.map((group) => (
           <div key={group.title} className="flex flex-col gap-1">
-            <span className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-neutral-600">
+            <span className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-widest text-neutral-600">
               {group.title}
             </span>
             {group.items.map((item) => {
@@ -192,19 +202,24 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   href={item.href}
                   onClick={() => setOpen(false)}
                   className={cn(
-                    "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
+                    "card-hover group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm",
                     active
-                      ? "bg-gradient-to-r from-emerald-500/15 to-transparent text-white ring-1 ring-inset ring-emerald-400/25"
-                      : "text-neutral-400 hover:bg-white/[0.04] hover:text-white"
+                      ? "bg-gradient-to-r from-emerald-500/25 via-emerald-500/10 to-transparent text-white ring-1 ring-inset ring-emerald-400/25"
+                      : "text-neutral-400 hover:bg-white/[0.05] hover:text-white"
                   )}
                 >
                   {active ? (
-                    <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-emerald-400" />
+                    <span className="absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-emerald-300 to-cyan-400" />
                   ) : null}
-                  <span className={cn(active ? "text-emerald-400" : "text-neutral-500")}>
+                  <span
+                    className={cn(
+                      "transition-colors",
+                      active ? "text-emerald-300" : "text-neutral-500 group-hover:text-emerald-300"
+                    )}
+                  >
                     <Icon name={item.icon} />
                   </span>
-                  {item.label}
+                  <span className="font-medium">{item.label}</span>
                 </Link>
               );
             })}
@@ -212,21 +227,16 @@ export default function AppShell({ children }: { children: ReactNode }) {
         ))}
       </nav>
 
-      <div className="relative border-t border-white/[0.06] p-4">
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-3.5">
+      <div className="relative border-t border-white/[0.06] p-3.5">
+        <div className="glass-strong rounded-2xl p-3.5">
           {user ? (
             <>
               <div className="flex items-center gap-3">
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-gradient-to-br from-emerald-400/90 to-cyan-500/90 text-xs font-bold text-neutral-950">
-                  {user.fullName
-                    .split(" ")
-                    .map((part) => part[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()}
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-xs font-bold text-[#04121f] shadow-[0_12px_32px_-14px_rgba(52,211,153,0.95)]">
+                  {initials}
                 </span>
                 <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm font-medium text-white">
+                  <span className="truncate text-sm font-semibold text-white">
                     {user.fullName}
                   </span>
                   <span className="truncate text-xs text-neutral-500">{user.email}</span>
@@ -242,11 +252,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 </span>
               </div>
 
-              <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/5">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-cyan-400 transition-all duration-500"
-                  style={{ width: `${inLevel}%` }}
-                />
+              <div className="mt-2.5 flex items-center gap-2">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-500"
+                    style={{ width: `${inLevel}%` }}
+                  />
+                </div>
+                <span className="text-[10px] font-medium text-neutral-500">{inLevel}%</span>
               </div>
             </>
           ) : (
@@ -270,24 +283,23 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-dvh bg-[#050a17]">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-72 border-r border-white/[0.06] bg-[#070d1c]/80 backdrop-blur-xl md:block">
-        {sidebar}
-      </aside>
+      <aside className="glass fixed inset-y-0 left-0 z-40 hidden w-72 md:block">{sidebar}</aside>
 
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-white/[0.06] bg-[#050a17]/85 px-4 backdrop-blur-xl md:hidden">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 text-sm font-bold text-neutral-950">
+      <header className="glass-strong sticky top-0 z-30 flex h-16 items-center justify-between px-4 md:hidden">
+        <Link href="/" className="flex items-center gap-2.5">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 font-display text-sm font-extrabold text-[#04121f]">
             D
           </span>
-          <span className="text-sm font-semibold text-white">
-            DRON<span className="text-emerald-400">CHI</span>
+          <span className="font-display text-sm font-extrabold tracking-tight text-white">
+            DRON<span className="gradient-text">CHI</span>
           </span>
         </Link>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-label="Menyu"
-          className="grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-neutral-300 transition hover:bg-white/5"
+          aria-expanded={open}
+          className="grid h-10 w-10 place-items-center rounded-full border border-white/10 text-neutral-300 transition hover:bg-white/5"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             {open ? (
@@ -306,23 +318,25 @@ export default function AppShell({ children }: { children: ReactNode }) {
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute inset-y-0 left-0 w-72 border-r border-white/10 bg-[#070d1c]">
+          <div className="glass-strong absolute inset-y-0 left-0 w-72 shadow-2xl shadow-black/50">
             {sidebar}
           </div>
         </div>
       ) : null}
 
       <main className="md:pl-72">
-        <div className="sticky top-0 z-30 hidden h-16 items-center justify-between gap-4 border-b border-white/[0.06] bg-[#050a17]/80 px-6 backdrop-blur-xl md:flex">
+        <div className="glass sticky top-0 z-30 hidden h-16 items-center justify-between gap-4 px-5 md:flex">
           <div className="flex min-w-0 flex-col">
-            <span className="truncate text-sm font-semibold text-white">{pageTitle}</span>
+            <span className="truncate font-display text-sm font-bold text-white">
+              {pageTitle}
+            </span>
             <span className="text-[11px] text-neutral-500">
               DRONCHI · aviatsiya ekotizimi
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="hidden items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm text-neutral-500 transition focus-within:border-emerald-400/40 lg:flex">
+            <label className="glass hidden items-center gap-2 rounded-xl px-3 py-2 text-sm text-neutral-500 lg:flex">
               <svg
                 width="15"
                 height="15"
@@ -346,7 +360,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <button
               type="button"
               aria-label="Bildirishnomalar"
-              className="relative grid h-10 w-10 place-items-center rounded-xl border border-white/10 text-neutral-400 transition hover:bg-white/5 hover:text-white"
+              className="glass relative grid h-10 w-10 place-items-center rounded-xl text-neutral-400 transition hover:text-white"
             >
               <svg
                 width="17"
@@ -362,25 +376,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7" />
                 <path d="M13.7 20a2 2 0 0 1-3.4 0" />
               </svg>
-              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-emerald-400" />
+              <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-emerald-400 pulse-glow" />
             </button>
 
             <Link
               href="/dashboard"
-              className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] py-1.5 pl-1.5 pr-3 transition hover:border-emerald-400/40"
+              className="glass-strong flex items-center gap-2.5 rounded-xl py-1.5 pl-1.5 pr-3 transition hover:brightness-110"
             >
-              <span className="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-emerald-400 to-cyan-500 text-[11px] font-bold text-neutral-950">
-                {user
-                  ? user.fullName
-                      .split(" ")
-                      .map((part) => part[0])
-                      .join("")
-                      .slice(0, 2)
-                      .toUpperCase()
-                  : "D"}
+              <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 text-[11px] font-bold text-[#04121f]">
+                {initials}
               </span>
               <span className="flex flex-col text-left leading-tight">
-                <span className="max-w-28 truncate text-xs font-medium text-white">
+                <span className="max-w-28 truncate text-xs font-semibold text-white">
                   {user?.fullName ?? "Mehmon"}
                 </span>
                 <span className="text-[10px] text-neutral-500">

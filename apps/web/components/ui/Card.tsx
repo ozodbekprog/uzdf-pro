@@ -6,16 +6,30 @@ interface CardProps {
   className?: string;
   glow?: boolean;
   hover?: boolean;
+  /** gradient hoshiya */
+  border?: boolean;
+  /** yuqoridan yorug'lik (mesh) effekti */
+  mesh?: boolean;
 }
 
-export default function Card({ children, className, glow, hover }: CardProps) {
+export default function Card({
+  children,
+  className,
+  glow,
+  hover,
+  border,
+  mesh,
+}: CardProps) {
   return (
     <div
       className={cn(
-        "relative rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-sm",
-        glow && "shadow-[0_0_40px_-12px] shadow-sky-500/30",
-        hover &&
-          "transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-400/40 hover:bg-white/[0.05]",
+        "relative rounded-3xl border border-white/[0.09]",
+        "bg-gradient-to-br from-white/[0.06] via-white/[0.025] to-transparent",
+        "backdrop-blur-xl",
+        hover && "card-hover",
+        glow && "ring-glow",
+        border && "gradient-border",
+        mesh && "mesh-card",
         className
       )}
     >

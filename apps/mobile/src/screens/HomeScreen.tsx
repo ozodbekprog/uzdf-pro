@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import {
   getDashboard,
   getMe,
@@ -14,9 +14,6 @@ import {
   Card,
   EmptyState,
   ErrorText,
-  H1,
-  H2,
-  H3,
   Loader,
   Muted,
   ProgressBar,
@@ -36,6 +33,16 @@ export interface HomeScreenProps {
 interface StatCard {
   label: string;
   value: string;
+}
+
+/** Bo'lim sarlavhasi: sarlavha + ixtiyoriy izoh. */
+function Section({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {hint ? <Text style={styles.sectionHint}>{hint}</Text> : null}
+    </View>
+  );
 }
 
 export default function HomeScreen({
@@ -122,11 +129,19 @@ export default function HomeScreen({
         />
       }
     >
-      <H1>Xush kelibsiz{user ? `, ${user.fullName}` : ""}</H1>
-      <Muted>Statistika, davom etish va so'nggi yangiliklar bir joyda.</Muted>
+      <View style={styles.hero}>
+        <View style={styles.heroGlow} />
+        <Text style={styles.heroKicker}>DRONCHI EKOTIZIMI</Text>
+        <Text style={styles.heroGreeting}>Xush kelibsiz{user ? "," : ""}</Text>
+        {user ? <Text style={styles.heroName}>{user.fullName}</Text> : null}
+        <Text style={styles.heroSub}>
+          Statistika, davom etish va so'nggi yangiliklar bir joyda.
+        </Text>
+      </View>
+
       <ErrorText message={error} />
 
-      <H2>Statistika</H2>
+      <Section title="Statistika" hint="Faoliyatingiz bo'yicha umumiy ko'rsatkichlar" />
       {stats.length === 0 ? (
         <EmptyState title="Statistika yo'q" description="Ma'lumot yuklanmadi." />
       ) : (
@@ -134,8 +149,11 @@ export default function HomeScreen({
           <Row key={`stat-row-${rowIndex}`} style={styles.statRow}>
             {rowItems.map((s) => (
               <Card key={s.label} style={styles.statCard}>
-                <Muted style={styles.statLabel}>{s.label}</Muted>
-                <H2>{s.value}</H2>
+                <View style={styles.statSheen} />
+                <Text style={styles.statValue}>{s.value}</Text>
+                <Text style={styles.statLabel} numberOfLines={2}>
+                  {s.label}
+                </Text>
               </Card>
             ))}
             {rowItems.length === 1 ? <View style={styles.statSpacer} /> : null}
@@ -143,19 +161,22 @@ export default function HomeScreen({
         ))
       )}
 
-      <H2>Davom etish</H2>
+      <Section title="Davom etish" hint="O'qishni shu yerdan davom ettiring" />
       {continueCourse ? (
-        <Card>
-          <H3>{continueCourse.title}</H3>
-          <Muted style={styles.nextLesson}>
+        <Card style={styles.panel}>
+          <View style={styles.panelSheen} />
+          <Row style={styles.continueHead}>
+            <Badge label={`${continueCourse.percent}%`} tone="primary" />
+            <Muted>
+              {continueCourse.completedCount}/{continueCourse.lessonsCount} dars
+            </Muted>
+          </Row>
+          <Text style={styles.continueTitle}>{continueCourse.title}</Text>
+          <Text style={styles.continueNext}>
             {continueCourse.nextLessonTitle
               ? `Keyingi dars: ${continueCourse.nextLessonTitle}`
               : "Barcha darslar tugallangan."}
-          </Muted>
-          <Muted style={styles.progressLabel}>
-            {continueCourse.completedCount}/{continueCourse.lessonsCount} dars •{" "}
-            {continueCourse.percent}%
-          </Muted>
+          </Text>
           <View style={styles.progress}>
             <ProgressBar value={continueCourse.percent} />
           </View>
@@ -172,7 +193,7 @@ export default function HomeScreen({
         />
       )}
 
-      <H2>Tezkor havolalar</H2>
+      <Section title="Tezkor havolalar" hint="Kerakli bo'limga tez o'ting" />
       <Row style={styles.linkRow}>
         <Button
           title="Xarita"
@@ -202,7 +223,10 @@ export default function HomeScreen({
         />
       </Row>
 
-      <H2>{showNews ? "Barcha yangiliklar" : "So'nggi yangiliklar"}</H2>
+      <Section
+        title={showNews ? "Barcha yangiliklar" : "So'nggi yangiliklar"}
+        hint="E'lonlar va yangilanishlar"
+      />
       {visibleNews.length === 0 ? (
         <EmptyState
           title="Yangiliklar yo'q"
@@ -215,13 +239,18 @@ export default function HomeScreen({
             onPress={() => onOpenNews(item.slug)}
             style={({ pressed }) => (pressed ? styles.pressed : undefined)}
           >
-            <Card>
+            <Card style={styles.panel}>
+              <View style={styles.newsAccent} />
               <Row style={styles.newsMeta}>
                 {item.category ? <Badge label={item.category} tone="accent" /> : null}
                 <Muted>{formatDate(item.publishedAt)}</Muted>
               </Row>
-              <H3>{item.title}</H3>
-              {item.summary ? <Muted numberOfLines={2}>{item.summary}</Muted> : null}
+              <Text style={styles.newsTitle}>{item.title}</Text>
+              {item.summary ? (
+                <Muted numberOfLines={2} style={styles.newsSummary}>
+                  {item.summary}
+                </Muted>
+              ) : null}
             </Card>
           </Pressable>
         ))
@@ -231,16 +260,146 @@ export default function HomeScreen({
 }
 
 const styles = StyleSheet.create({
+  /* Hero */
+  hero: {
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surfaceAlt,
+    padding: 18,
+    overflow: "hidden",
+    gap: 2,
+  },
+  heroGlow: {
+    position: "absolute",
+    top: -60,
+    right: -40,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: "rgba(52,211,153,0.16)",
+  },
+  heroKicker: {
+    color: colors.primary,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.4,
+    marginBottom: 6,
+  },
+  heroGreeting: { color: colors.muted, fontSize: 15, fontWeight: "600" },
+  heroName: {
+    color: colors.text,
+    fontSize: 30,
+    fontWeight: "800",
+    letterSpacing: -0.6,
+    lineHeight: 36,
+  },
+  heroSub: { color: colors.muted, fontSize: 13, lineHeight: 19, marginTop: 6 },
+
+  /* Bo'lim sarlavhalari */
+  sectionHead: { marginTop: 6, gap: 2 },
+  sectionTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
+  sectionHint: { color: colors.muted, fontSize: 12 },
+
+  /* Umumiy karta (+ ikki qatlamli fon) */
+  panel: {
+    borderRadius: 18,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
+    padding: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
+  },
+  panelSheen: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 72,
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+
+  /* Statistika */
   statRow: { gap: 12, alignItems: "stretch" },
-  statCard: { flex: 1, padding: 14 },
-  statLabel: { marginBottom: 4 },
+  statCard: {
+    flex: 1,
+    borderRadius: 18,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
+    padding: 15,
+    overflow: "hidden",
+    minHeight: 96,
+    justifyContent: "space-between",
+    shadowColor: "#000",
+    shadowOpacity: 0.28,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  statSheen: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 46,
+    backgroundColor: "rgba(52,211,153,0.07)",
+  },
+  statValue: {
+    color: colors.primary,
+    fontSize: 26,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+  },
+  statLabel: {
+    color: colors.muted,
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 6,
+    lineHeight: 16,
+  },
   statSpacer: { flex: 1 },
-  nextLesson: { marginTop: 6 },
-  progressLabel: { marginTop: 4, marginBottom: 8 },
-  progress: { marginBottom: 12 },
-  continueButton: { marginTop: 4 },
+
+  /* Davom etish */
+  continueHead: { justifyContent: "space-between", gap: 8, marginBottom: 10 },
+  continueTitle: {
+    color: colors.text,
+    fontSize: 17,
+    fontWeight: "800",
+    letterSpacing: -0.2,
+  },
+  continueNext: { color: colors.muted, fontSize: 13, lineHeight: 19, marginTop: 6 },
+  progress: { marginTop: 14, marginBottom: 14 },
+  continueButton: { marginTop: 2 },
+
+  /* Tezkor havolalar */
   linkRow: { gap: 12 },
-  linkButton: { flex: 1 },
-  newsMeta: { justifyContent: "space-between", gap: 8, marginBottom: 6 },
+  linkButton: { flex: 1, minHeight: 54, borderRadius: 16 },
+
+  /* Yangiliklar */
+  newsMeta: { justifyContent: "space-between", gap: 8, marginBottom: 8 },
+  newsAccent: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 3,
+    backgroundColor: colors.primary,
+  },
+  newsTitle: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: "700",
+    lineHeight: 21,
+  },
+  newsSummary: { marginTop: 6 },
   pressed: { opacity: 0.9 },
 });

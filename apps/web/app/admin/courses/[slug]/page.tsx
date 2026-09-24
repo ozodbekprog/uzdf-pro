@@ -191,7 +191,6 @@ function CourseAdmin({ slug }: { slug: string }) {
       setQuizDraft(null);
       return;
     }
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- dars tanlanganda test qoralamasini tiklash
     setQuizDraft(quizToDraft(quizzes.find((quiz) => quiz.lessonId === selectedLessonId)));
   }, [quizzes, selectedLessonId]);
 

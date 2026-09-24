@@ -18,13 +18,25 @@ import { theme } from "../theme";
 /** Eski nom bilan moslik uchun (mavjud ekranlar `colors` ishlatadi). */
 export const colors = theme.colors;
 
+/** Keng tarqalgan tonlar (Badge, StatTile, Chip va h.k. uchun bir xil). */
+export type Tone = "neutral" | "primary" | "accent" | "warning" | "danger";
+
+const tonePalette: Record<Tone, { fg: string; bg: string; border: string }> = {
+  neutral: { fg: theme.colors.muted, bg: "rgba(255,255,255,0.06)", border: theme.colors.border },
+  primary: { fg: theme.colors.primary, bg: "rgba(52,211,153,0.14)", border: "rgba(52,211,153,0.35)" },
+  accent: { fg: theme.colors.accent, bg: "rgba(34,211,238,0.12)", border: "rgba(34,211,238,0.32)" },
+  warning: { fg: theme.colors.warning, bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.32)" },
+  danger: { fg: theme.colors.danger, bg: "rgba(248,113,113,0.12)", border: "rgba(248,113,113,0.32)" }
+};
+
 export const ui = {
   card: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.card,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    padding: 16
+    padding: 16,
+    ...theme.shadows.md
   } as ViewStyle
 };
 
@@ -37,7 +49,52 @@ export function Card({
   children: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 }) {
-  return <View style={[styles.card, style]}>{children}</View>;
+  return (
+    <View style={[styles.card, style]}>
+      <View style={styles.cardSheen} pointerEvents="none" />
+      {children}
+    </View>
+  );
+}
+
+/**
+ * Ekran sarlavhasi: katta (800) sarlavha + izoh + o'ng tomondagi element.
+ * `H1`/`Muted` juftligining boyitilgan varianti.
+ */
+export function ScreenHeader({
+  title,
+  subtitle,
+  right
+}: {
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+}) {
+  return (
+    <View style={styles.screenHeader}>
+      <View style={styles.screenHeaderMain}>
+        <Text style={styles.screenHeaderTitle}>{title}</Text>
+        {subtitle ? <Text style={styles.screenHeaderSubtitle}>{subtitle}</Text> : null}
+      </View>
+      {right ? <View style={styles.screenHeaderRight}>{right}</View> : null}
+    </View>
+  );
+}
+
+/** Bo'lim sarlavhasi: matn + ixtiyoriy o'ng aksiYa. */
+export function SectionTitle({
+  children,
+  action
+}: {
+  children: React.ReactNode;
+  action?: React.ReactNode;
+}) {
+  return (
+    <View style={styles.sectionTitle}>
+      <Text style={styles.sectionTitleText}>{children}</Text>
+      {action ? <View style={styles.sectionTitleAction}>{action}</View> : null}
+    </View>
+  );
 }
 
 export function Screen({
@@ -78,74 +135,135 @@ export function Divider() {
   return <View style={styles.divider} />;
 }
 
-/* --------------------------------- Matnlar --------------------------------- */
+/* ------------------------------ Statistika/karta ----------------------------- */
 
-export function H1({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.h1}>{children}</Text>;
-}
-
-export function H2({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.h2}>{children}</Text>;
-}
-
-export function H3({ children }: { children: React.ReactNode }) {
-  return <Text style={styles.h3}>{children}</Text>;
-}
-
-export function Body({
-  children,
-  style,
-  numberOfLines
+/** Kichik statistika kartasi (label + qiymat + ixtiyoriy belgi). */
+export function StatTile({
+  label,
+  value,
+  icon,
+  tone = "primary"
 }: {
-  children: React.ReactNode;
-  style?: StyleProp<TextStyle>;
-  numberOfLines?: number;
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+  tone?: Tone;
 }) {
+  const c = tonePalette[tone];
   return (
-    <Text style={[styles.body, style]} numberOfLines={numberOfLines}>
-      {children}
-    </Text>
+    <View style={[styles.statTile, { borderColor: c.border }]}>
+      {icon ? (
+        <View style={[styles.statIcon, { backgroundColor: c.bg, borderColor: c.border }]}>
+          {icon}
+        </View>
+      ) : null}
+      <Text style={styles.statValue} numberOfLines={1}>
+        {value}
+      </Text>
+      <Text style={styles.statLabel} numberOfLines={1}>
+        {label}
+      </Text>
+    </View>
   );
 }
 
-export function Muted({
-  children,
-  style,
-  numberOfLines
-}: {
-  children: React.ReactNode;
-  style?: StyleProp<TextStyle>;
-  numberOfLines?: number;
-}) {
-  return (
-    <Text style={[styles.muted, style]} numberOfLines={numberOfLines}>
-      {children}
-    </Text>
-  );
-}
+/* ------------------------------- Elementlar --------------------------------- */
 
-export function ErrorText({ message }: { message: string | null }) {
-  if (!message) return null;
-  return <Text style={styles.error}>{message}</Text>;
-}
-
-/* -------------------------------- Elementlar -------------------------------- */
-
-export type BadgeTone = "neutral" | "primary" | "accent" | "warning" | "danger";
+export type BadgeTone = Tone;
 
 export function Badge({ label, tone = "neutral" }: { label: string; tone?: BadgeTone }) {
-  const palette: Record<BadgeTone, { bg: string; fg: string; border: string }> = {
-    neutral: { bg: "rgba(255,255,255,0.06)", fg: theme.colors.muted, border: theme.colors.border },
-    primary: { bg: "rgba(52,211,153,0.14)", fg: theme.colors.primary, border: "rgba(52,211,153,0.35)" },
-    accent: { bg: "rgba(34,211,238,0.12)", fg: theme.colors.accent, border: "rgba(34,211,238,0.32)" },
-    warning: { bg: "rgba(251,191,36,0.12)", fg: theme.colors.warning, border: "rgba(251,191,36,0.32)" },
-    danger: { bg: "rgba(248,113,113,0.12)", fg: theme.colors.danger, border: "rgba(248,113,113,0.32)" }
-  };
-  const c = palette[tone];
+  const c = tonePalette[tone];
   return (
     <View style={[styles.badge, { backgroundColor: c.bg, borderColor: c.border }]}>
       <Text style={[styles.badgeText, { color: c.fg }]}>{label}</Text>
     </View>
+  );
+}
+
+/** Filtr tugmasi (chiplash). `active` bo'lganda emerald fon oladi. */
+export function Chip({
+  label,
+  active = false,
+  onPress
+}: {
+  label: string;
+  active?: boolean;
+  onPress?: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={!onPress}
+      style={({ pressed }) => [
+        styles.chip,
+        active ? styles.chipActive : null,
+        pressed && onPress ? styles.pressed : null
+      ]}
+    >
+      <Text style={[styles.chipText, active ? styles.chipTextActive : null]} numberOfLines={1}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
+/** Gradient o'rniga to'q emerald doira + bosh harflar. */
+export function Avatar({ name, size = 40 }: { name: string; size?: number }) {
+  const initials =
+    name
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((word) => word.charAt(0).toUpperCase())
+      .join("") || "?";
+
+  return (
+    <View style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}>
+      <Text style={[styles.avatarText, { fontSize: Math.round(size * 0.38) }]}>{initials}</Text>
+    </View>
+  );
+}
+
+/** Bosiladigan qator: sarlavha + izoh + o'ng element. */
+export function ListRow({
+  title,
+  subtitle,
+  right,
+  onPress
+}: {
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+  onPress?: () => void;
+}) {
+  const content = (
+    <>
+      <View style={styles.listRowMain}>
+        <Text style={styles.listRowTitle} numberOfLines={1}>
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text style={styles.listRowSubtitle} numberOfLines={2}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+      {right ? <View style={styles.listRowRight}>{right}</View> : null}
+    </>
+  );
+
+  if (!onPress) {
+    return <View style={styles.listRow}>{content}</View>;
+  }
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.listRow, pressed ? styles.listRowPressed : null]}
+    >
+      {content}
+    </Pressable>
   );
 }
 
@@ -271,21 +389,127 @@ export function formatDate(iso: string): string {
   return date.toLocaleDateString("uz-UZ", { year: "numeric", month: "long", day: "numeric" });
 }
 
+/* --------------------------------- Matnlar --------------------------------- */
+
+export function H1({ children }: { children: React.ReactNode }) {
+  return <Text style={styles.h1}>{children}</Text>;
+}
+
+export function H2({ children }: { children: React.ReactNode }) {
+  return <Text style={styles.h2}>{children}</Text>;
+}
+
+export function H3({ children }: { children: React.ReactNode }) {
+  return <Text style={styles.h3}>{children}</Text>;
+}
+
+export function Body({
+  children,
+  style,
+  numberOfLines
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+}) {
+  return (
+    <Text style={[styles.body, style]} numberOfLines={numberOfLines}>
+      {children}
+    </Text>
+  );
+}
+
+export function Muted({
+  children,
+  style,
+  numberOfLines
+}: {
+  children: React.ReactNode;
+  style?: StyleProp<TextStyle>;
+  numberOfLines?: number;
+}) {
+  return (
+    <Text style={[styles.muted, style]} numberOfLines={numberOfLines}>
+      {children}
+    </Text>
+  );
+}
+
+export function ErrorText({ message }: { message: string | null }) {
+  if (!message) return null;
+  return <Text style={styles.error}>{message}</Text>;
+}
+
 /* --------------------------------- Uslublar --------------------------------- */
 
 const styles = StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface,
-    borderRadius: theme.radius.md,
+    borderRadius: theme.radius.card,
     borderWidth: 1,
-    borderColor: theme.colors.border,
-    padding: 16
+    borderColor: theme.colors.borderStrong,
+    padding: 16,
+    overflow: "hidden",
+    ...theme.shadows.md
   },
+  /** Ikkinchi qatlam fon: yuqoridan pastga nozik yorug'lik. */
+  cardSheen: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.06)"
+  },
+  statTile: {
+    flex: 1,
+    minWidth: 0,
+    backgroundColor: theme.colors.surfaceRaised,
+    borderRadius: theme.radius.card,
+    borderWidth: 1,
+    padding: 14,
+    gap: 4,
+    ...theme.shadows.sm
+  },
+  statIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: theme.radius.sm,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6
+  },
+  statValue: { fontSize: 20, fontWeight: "800", color: theme.colors.text, letterSpacing: -0.3 },
+  statLabel: { fontSize: 12, color: theme.colors.muted, fontWeight: "600" },
+
   screen: { flex: 1, backgroundColor: theme.colors.bg },
   screenScroll: { flex: 1, backgroundColor: theme.colors.bg },
   screenContent: { padding: 16, paddingBottom: 40, gap: 12 },
   row: { flexDirection: "row", alignItems: "center" },
   divider: { height: 1, backgroundColor: theme.colors.border, marginVertical: 12 },
+
+  screenHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 2
+  },
+  screenHeaderMain: { flex: 1, gap: 3 },
+  screenHeaderTitle: { fontSize: 26, fontWeight: "800", color: theme.colors.text, letterSpacing: -0.6 },
+  screenHeaderSubtitle: { fontSize: 13, color: theme.colors.muted, lineHeight: 19 },
+  screenHeaderRight: { alignItems: "flex-end" },
+
+  sectionTitle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 10,
+    marginTop: 4
+  },
+  sectionTitleText: { fontSize: 17, fontWeight: "700", color: theme.colors.text, letterSpacing: -0.2 },
+  sectionTitleAction: { alignItems: "flex-end" },
 
   h1: { fontSize: 26, fontWeight: "800", color: theme.colors.text, letterSpacing: -0.4 },
   h2: { fontSize: 18, fontWeight: "700", color: theme.colors.text },
@@ -310,6 +534,48 @@ const styles = StyleSheet.create({
     paddingVertical: 3
   },
   badgeText: { fontSize: 11, fontWeight: "600" },
+
+  chip: {
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: "rgba(255,255,255,0.04)",
+    borderRadius: theme.radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 7
+  },
+  chipActive: {
+    backgroundColor: "rgba(52,211,153,0.16)",
+    borderColor: "rgba(52,211,153,0.5)"
+  },
+  chipText: { fontSize: 13, fontWeight: "600", color: theme.colors.muted },
+  chipTextActive: { color: theme.colors.primary },
+
+  avatar: {
+    backgroundColor: "#064e3b",
+    borderWidth: 1,
+    borderColor: "rgba(52,211,153,0.5)",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  avatarText: { color: theme.colors.primary, fontWeight: "800" },
+
+  listRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+    backgroundColor: theme.colors.surface,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.radius.card,
+    paddingHorizontal: 14,
+    paddingVertical: 13
+  },
+  listRowPressed: { opacity: 0.85, borderColor: theme.colors.borderStrong },
+  listRowMain: { flex: 1, gap: 2 },
+  listRowTitle: { fontSize: 14, fontWeight: "700", color: theme.colors.text },
+  listRowSubtitle: { fontSize: 12, color: theme.colors.muted, lineHeight: 17 },
+  listRowRight: { alignItems: "flex-end", justifyContent: "center" },
 
   button: {
     borderRadius: theme.radius.md,

@@ -2,7 +2,9 @@
 
 :root {
   --background: #050a17;
-  --foreground: #e8eefc;
+  --foreground: #eaf1ff;
+  --emerald: 52 211 153;
+  --cyan: 34 211 238;
 }
 
 @theme inline {
@@ -10,6 +12,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-sora);
 }
 
 html {
@@ -21,147 +24,281 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
-  background-image:
-    radial-gradient(60rem 60rem at 12% -12%, rgba(16, 185, 129, 0.12), transparent 60%),
-    radial-gradient(50rem 50rem at 110% 8%, rgba(34, 211, 238, 0.08), transparent 60%);
-  background-attachment: fixed;
+  overflow-x: hidden;
 }
 
 ::selection {
-  background: rgba(16, 185, 129, 0.3);
+  background: rgba(52, 211, 153, 0.35);
+  color: #fff;
 }
 
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
 }
-
 ::-webkit-scrollbar-track {
   background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.12);
   border-radius: 999px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(52, 211, 153, 0.4);
+}
+
+/* ------------------------------- Orqa fonlar ------------------------------- */
+
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora::before,
+.aurora::after {
+  content: "";
+  position: absolute;
+  width: 46rem;
+  height: 46rem;
+  border-radius: 999px;
+  filter: blur(120px);
+  opacity: 0.55;
+}
+
+.aurora::before {
+  top: -16rem;
+  left: -10rem;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.5), transparent 65%);
+  animation: drift 22s ease-in-out infinite alternate;
+}
+
+.aurora::after {
+  top: 8rem;
+  right: -14rem;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.42), transparent 65%);
+  animation: drift 26s ease-in-out infinite alternate-reverse;
+}
+
+.grid-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 46px 46px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* --------------------------------- Yuzalar --------------------------------- */
+
+.glass {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  backdrop-filter: blur(14px);
+}
+
+.glass-strong {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(20px);
+}
+
+.ring-glow {
+  box-shadow:
+    0 0 0 1px rgba(52, 211, 153, 0.22),
+    0 22px 60px -28px rgba(52, 211, 153, 0.55);
+}
+
+.card-hover {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 0 30px 70px -40px rgba(52, 211, 153, 0.7);
+}
+
+.mesh-card {
+  position: relative;
+  overflow: hidden;
+}
+.mesh-card::before {
+  content: "";
+  position: absolute;
+  inset: -40% -20% auto -20%;
+  height: 70%;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(52, 211, 153, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.gradient-text {
+  background: linear-gradient(100deg, #6ee7b7, #34d399 35%, #22d3ee 75%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gradient-border {
+  position: relative;
+}
+.gradient-border::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(130deg, rgba(52, 211, 153, 0.6), rgba(34, 211, 238, 0.15), transparent 70%);
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* -------------------------------- Animatsiya -------------------------------- */
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(6rem, 4rem, 0) scale(1.15);
+  }
 }
 
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
 .fade-up {
-  animation: fadeUp 0.45s ease both;
+  animation: fadeUp 0.5s ease both;
 }
-
-/* --- Professional animatsiyalar (yuklanish / kirish) --- */
 
 @keyframes riseIn {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.99);
+    transform: translateY(22px) scale(0.985);
   }
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
-
 .rise {
-  animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: riseIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
-
-.rise-1 { animation-delay: 0.04s; }
-.rise-2 { animation-delay: 0.1s; }
-.rise-3 { animation-delay: 0.16s; }
-.rise-4 { animation-delay: 0.22s; }
-.rise-5 { animation-delay: 0.28s; }
-.rise-6 { animation-delay: 0.34s; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.12s; }
+.rise-3 { animation-delay: 0.19s; }
+.rise-4 { animation-delay: 0.26s; }
+.rise-5 { animation-delay: 0.33s; }
+.rise-6 { animation-delay: 0.4s; }
 
 @keyframes shimmer {
   100% {
     transform: translateX(100%);
   }
 }
-
 .skeleton {
   position: relative;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.05);
 }
-
 .skeleton::after {
   content: "";
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.09), transparent);
   animation: shimmer 1.5s infinite;
 }
 
 @keyframes floaty {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-14px); }
 }
-
 .floaty {
   animation: floaty 7s ease-in-out infinite;
 }
 
-@keyframes pulseRing {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  70% { transform: scale(1.6); opacity: 0; }
-  100% { transform: scale(1.6); opacity: 0; }
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
 }
 
-.pulse-ring::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: currentColor;
-  animation: pulseRing 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+.pulse-glow {
+  animation: pulseGlow 3.4s ease-in-out infinite;
+}
+
+@keyframes shine {
+  from { background-position: 200% center; }
+  to { background-position: -200% center; }
+}
+.shine-text {
+  background: linear-gradient(90deg, #eaf1ff 20%, #6ee7b7 45%, #22d3ee 55%, #eaf1ff 80%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 7s linear infinite;
 }
 
 @keyframes spinSlow {
   to { transform: rotate(360deg); }
 }
-
 .spin-slow {
-  animation: spinSlow 18s linear infinite;
+  animation: spinSlow 26s linear infinite;
 }
 
 .grid-bg {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .rise,
-  .fade-up,
-  .floaty,
-  .spin-slow,
-  .skeleton::after {
-    animation: none !important;
-  }
-}
+/* --------------------------------- Leaflet --------------------------------- */
 
 .leaflet-container {
   width: 100%;
@@ -169,12 +306,25 @@ body {
   background: #0b0f14;
   border-radius: 0.75rem;
 }
-
 .leaflet-control-attribution {
   background: rgba(6, 8, 12, 0.7) !important;
   color: #9ca3af !important;
 }
-
 .leaflet-control-attribution a {
   color: #38bdf8 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .fade-up,
+  .floaty,
+  .spin-slow,
+  .pulse-glow,
+  .shine-text,
+  .aurora::before,
+  .aurora::after,
+  .marquee-track,
+  .skeleton::after {
+    animation: none !important;
+  }
 }

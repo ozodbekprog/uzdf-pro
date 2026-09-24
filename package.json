@@ -8,6 +8,8 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "node scripts/fix-rn-polyfills.mjs",
+    "fix:rn-polyfills": "node scripts/fix-rn-polyfills.mjs",
     "db:start": "bash scripts/db-start.sh",
     "db:stop": "bash scripts/db-stop.sh",
     "db:push": "npm --workspace @uzdfpro/api run db:push",

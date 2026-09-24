@@ -22,8 +22,6 @@ import {
   EmptyState,
   ErrorText,
   Field,
-  H1,
-  H2,
   H3,
   Input,
   Loader,
@@ -65,6 +63,16 @@ function ratingColor(position: number): string | null {
   if (position === 2) return "#cbd5e1";
   if (position === 3) return "#b45309";
   return null;
+}
+
+/** Bo'lim sarlavhasi: sarlavha + ixtiyoriy izoh. */
+function Section({ title, hint }: { title: string; hint?: string }) {
+  return (
+    <View style={styles.sectionHead}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {hint ? <Text style={styles.sectionHint}>{hint}</Text> : null}
+    </View>
+  );
 }
 
 export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void }) {
@@ -181,16 +189,19 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
         />
       }
     >
-      <H1>Kabinet</H1>
+      <Text style={styles.screenTitle}>Kabinet</Text>
 
       {user ? (
-        <Card>
+        <Card style={styles.profileCard}>
+          <View style={styles.profileGlow} />
           <Row style={styles.profileRow}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{initials(user.fullName)}</Text>
+            <View style={styles.avatarRing}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarText}>{initials(user.fullName)}</Text>
+              </View>
             </View>
             <View style={styles.profileInfo}>
-              <H2>{user.fullName}</H2>
+              <Text style={styles.profileName}>{user.fullName}</Text>
               <Muted>{user.email}</Muted>
               <Row style={styles.badges}>
                 <Badge label={roleLabel(user.role)} tone={roleTone(user.role)} />
@@ -208,23 +219,27 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
 
       <ErrorText message={error} />
 
-      <Card>
-        <H2>Statistika</H2>
+      <Section title="Statistika" hint="Umumiy ko'rsatkichlaringiz" />
+      <Card style={styles.panel}>
+        <View style={styles.panelSheen} />
         <View style={styles.grid}>
           {stats.map((s) => (
             <View key={s.label} style={styles.gridItem}>
               <Text style={styles.statValue}>{s.value}</Text>
-              <Muted>{s.label}</Muted>
+              <Text style={styles.statLabel} numberOfLines={2}>
+                {s.label}
+              </Text>
             </View>
           ))}
         </View>
       </Card>
 
-      <Card>
-        <H2>Daraja progressi</H2>
+      <Section title="Daraja progressi" hint="Keyingi darajagacha yig'ilgan tajriba" />
+      <Card style={styles.panel}>
+        <View style={styles.panelSheen} />
         <Row style={styles.progressHead}>
           <H3>{level}-daraja</H3>
-          <Muted>{levelProgress}%</Muted>
+          <Badge label={`${levelProgress}%`} tone="primary" />
         </Row>
         <ProgressBar value={levelProgress} />
         <View style={styles.progressNote}>
@@ -232,8 +247,9 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
         </View>
       </Card>
 
-      <Card>
-        <H2>Sertifikatlar</H2>
+      <Section title="Sertifikatlar" hint="Yakunlangan kurslar bo'yicha" />
+      <Card style={styles.panel}>
+        <View style={styles.panelSheen} />
         {certificates.length === 0 ? (
           <EmptyState
             title="Sertifikatlar yo'q"
@@ -243,16 +259,19 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
           certificates.map((c, index) => (
             <View key={c.id}>
               {index > 0 ? <Divider /> : null}
-              <Body>{c.course.title}</Body>
+              <Body style={styles.certTitle}>{c.course.title}</Body>
               <Muted>{formatDate(c.issuedAt)}</Muted>
-              <Text style={styles.certCode}>{c.code}</Text>
+              <View style={styles.certCodeRow}>
+                <Badge label={c.code} tone="accent" />
+              </View>
             </View>
           ))
         )}
       </Card>
 
-      <Card>
-        <H2>Reyting</H2>
+      <Section title="Reyting" hint="Eng faol ishtirokchilar" />
+      <Card style={styles.panel}>
+        <View style={styles.panelSheen} />
         {rating.length === 0 ? (
           <EmptyState title="Reyting bo'sh" description="Hali natijalar qayd etilmagan." />
         ) : (
@@ -272,7 +291,7 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
                     </View>
                   )}
                   <View style={styles.ratingInfo}>
-                    <Body>{r.fullName}</Body>
+                    <Body style={styles.ratingName}>{r.fullName}</Body>
                     <Muted>
                       {r.exp} EXP • {r.level}-daraja
                     </Muted>
@@ -284,8 +303,9 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
         )}
       </Card>
 
-      <Card>
-        <H2>Sozlamalar</H2>
+      <Section title="Sozlamalar" hint="Ulanish va hisobdan chiqish" />
+      <Card style={styles.panel}>
+        <View style={styles.panelSheen} />
         <Field label="API manzili" hint="Telefon va kompyuter bitta tarmoqda bo'lsin.">
           <Input
             value={apiUrlInput}
@@ -314,41 +334,128 @@ export default function CabinetScreen({ onLoggedOut }: { onLoggedOut: () => void
 }
 
 const styles = StyleSheet.create({
+  screenTitle: {
+    color: colors.text,
+    fontSize: 26,
+    fontWeight: "800",
+    letterSpacing: -0.5,
+  },
+
+  /* Bo'lim sarlavhalari */
+  sectionHead: { marginTop: 6, gap: 2 },
+  sectionTitle: {
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
+  sectionHint: { color: colors.muted, fontSize: 12 },
+
+  /* Umumiy karta (+ ikki qatlamli fon) */
+  panel: {
+    borderRadius: 18,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surface,
+    padding: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
+  },
+  panelSheen: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    height: 72,
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+
+  /* Profil */
+  profileCard: {
+    borderRadius: 18,
+    borderColor: colors.borderStrong,
+    backgroundColor: colors.surfaceAlt,
+    padding: 18,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 6,
+  },
+  profileGlow: {
+    position: "absolute",
+    top: -50,
+    right: -30,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "rgba(52,211,153,0.14)",
+  },
   profileRow: { alignItems: "flex-start", gap: 14 },
+  avatarRing: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(52,211,153,0.35)",
+    backgroundColor: "rgba(52,211,153,0.08)",
+  },
   avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: colors.primary,
     alignItems: "center",
     justifyContent: "center",
   },
-  avatarText: { color: "#04121f", fontSize: 20, fontWeight: "800" },
+  avatarText: { color: "#04121f", fontSize: 19, fontWeight: "800" },
   profileInfo: { flex: 1, gap: 4 },
+  profileName: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: "800",
+    letterSpacing: -0.3,
+  },
   badges: { flexWrap: "wrap", gap: 6, marginTop: 6 },
 
-  grid: { flexDirection: "row", flexWrap: "wrap", marginTop: 6 },
-  gridItem: { width: "50%", paddingVertical: 10, paddingRight: 8 },
-  statValue: { color: colors.text, fontSize: 22, fontWeight: "800" },
-
-  progressHead: { justifyContent: "space-between", marginBottom: 8 },
-  progressNote: { marginTop: 8 },
-
-  certCode: {
-    color: colors.primary,
-    fontSize: 13,
-    fontWeight: "600",
-    marginTop: 4,
-    letterSpacing: 0.5,
+  /* Statistika */
+  grid: { flexDirection: "row", flexWrap: "wrap" },
+  gridItem: {
+    width: "50%",
+    paddingVertical: 12,
+    paddingRight: 8,
+    gap: 4,
   },
+  statValue: {
+    color: colors.primary,
+    fontSize: 24,
+    fontWeight: "800",
+    letterSpacing: -0.4,
+  },
+  statLabel: { color: colors.muted, fontSize: 12, fontWeight: "600", lineHeight: 16 },
 
+  /* Progress */
+  progressHead: { justifyContent: "space-between", marginBottom: 12 },
+  progressNote: { marginTop: 10 },
+
+  /* Sertifikatlar */
+  certTitle: { fontWeight: "700" },
+  certCodeRow: { marginTop: 8 },
+
+  /* Reyting */
   ratingRow: { gap: 12 },
-  rankBadge: { width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" },
+  rankBadge: { width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center" },
   rankBadgeText: { color: "#0b1020", fontSize: 14, fontWeight: "800" },
   rankPlain: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
@@ -356,6 +463,7 @@ const styles = StyleSheet.create({
   },
   rankPlainText: { color: colors.muted, fontSize: 14, fontWeight: "700" },
   ratingInfo: { flex: 1, gap: 2 },
+  ratingName: { fontWeight: "700" },
 
   logout: { marginTop: 12 },
 });
